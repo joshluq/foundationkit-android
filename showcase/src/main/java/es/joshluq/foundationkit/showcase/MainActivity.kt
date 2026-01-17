@@ -7,28 +7,38 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import es.joshluq.foundationkit.log.Loggerkit
 import es.joshluq.foundationkit.showcase.ui.theme.ShowcaseTheme
+import es.joshluq.foundationkit.usecase.NoneInput
 import es.joshluq.foundationkit.viewmodel.ScreenViewModel
 import es.joshluq.foundationkit.viewmodel.UiEffect
 import es.joshluq.foundationkit.viewmodel.UiEvent
 import es.joshluq.foundationkit.viewmodel.UiState
+import kotlinx.coroutines.launch
 
 // --- MVI Components for Showcase ---
 
@@ -87,7 +97,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
                             .padding(innerPadding)
                             .fillMaxSize()
@@ -95,16 +105,11 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Logger Demo Section
-                        LoggerDemo(logger = logger)
-
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-                        // ViewModel/MVI Demo Section
-                        MviDemo(
-                            state = state,
-                            onEvent = viewModel::sendEvent
-                        )
+                        item { LoggerDemo(logger = logger) }
+                        item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+                        item { MviDemo(state = state, onEvent = viewModel::sendEvent) }
+                        item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+                        item { UseCaseDemo() }
                     }
                 }
             }
@@ -118,7 +123,7 @@ fun LoggerDemo(logger: Loggerkit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = "Loggerkit Demo")
+        Text(text = "Loggerkit Demo", style = MaterialTheme.typography.titleMedium)
         Button(onClick = { logger.d("Demo", "Debug Log clicked") }) {
             Text("Send Debug Log")
         }
@@ -131,7 +136,7 @@ fun MviDemo(state: ShowcaseState, onEvent: (ShowcaseEvent) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = "ScreenViewModel (MVI) Demo")
+        Text(text = "ScreenViewModel (MVI) Demo", style = MaterialTheme.typography.titleMedium)
         Text(text = "Counter: ${state.counter}")
         
         Button(onClick = { onEvent(ShowcaseEvent.OnIncrementClick) }) {
@@ -141,5 +146,57 @@ fun MviDemo(state: ShowcaseState, onEvent: (ShowcaseEvent) -> Unit) {
         Button(onClick = { onEvent(ShowcaseEvent.OnShowToastClick) }) {
             Text("Show Effect (Toast)")
         }
+    }
+}
+
+@Composable
+fun UseCaseDemo() {
+    val scope = rememberCoroutineScope()
+    var useCaseResult by remember { androidx.compose.runtime.mutableStateOf("No result yet") }
+    val flowResults = remember { mutableStateListOf<Int>() }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(text = "UseCase Demo", style = MaterialTheme.typography.titleMedium)
+        
+        // Standard UseCase Example
+        Button(
+            onClick = {
+                scope.launch {
+                    val useCase = GetGreetingUseCase()
+                    useCase(GetGreetingInput("Josh")).onSuccess { 
+                        useCaseResult = it.message 
+                    }.onFailure {
+                        useCaseResult = "Error: ${it.message}"
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Run GetGreetingUseCase")
+        }
+        Text(text = useCaseResult)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // FlowUseCase Example
+        Button(
+            onClick = {
+                scope.launch {
+                    flowResults.clear()
+                    val flowUseCase = GetCounterFlowUseCase()
+                    flowUseCase(NoneInput).collect { result ->
+                        result.onSuccess { flowResults.add(it.value) }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Run GetCounterFlowUseCase (1 to 5)")
+        }
+        
+        Text(text = "Flow results: ${flowResults.joinToString(", ")}")
     }
 }
