@@ -39,9 +39,9 @@ interface FlowUseCase<in I : UseCaseInput, out O : UseCaseOutput> {
      * Executes the business logic and returns a cold [Flow].
      *
      * @param input The parameters required for the operation.
-     * @return A [Flow] emitting [Result] objects.
+     * @return A [Flow] emitting objects.
      */
-    operator fun invoke(input: I): Flow<Result<O>>
+    operator fun invoke(input: I): Flow<O>
 }
 
 /**
