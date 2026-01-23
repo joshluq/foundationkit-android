@@ -30,13 +30,14 @@ class UseCaseTest {
     fun `FlowUseCase should emit results`() = runTest {
         val useCase = object : FlowUseCase<TestInput, TestOutput> {
             override fun invoke(input: TestInput) = flowOf(
-                Result.success(TestOutput("Emitted ${input.value}"))
+                TestOutput("Emitted ${input.value}")
             )
+
+
         }
 
         val result = useCase(TestInput("test")).first()
 
-        assertTrue(result.isSuccess)
-        assertEquals("Emitted test", result.getOrNull()?.result)
+        assertEquals("Emitted test", result.result)
     }
 }
