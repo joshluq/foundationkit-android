@@ -32,10 +32,10 @@ class GetGreetingUseCase : UseCase<GetGreetingInput, GreetingOutput> {
 data class CounterOutput(val value: Int) : UseCaseOutput
 
 class GetCounterFlowUseCase : FlowUseCase<NoneInput, CounterOutput> {
-    override fun invoke(input: NoneInput): Flow<Result<CounterOutput>> = flow {
+    override fun invoke(input: NoneInput): Flow<CounterOutput> = flow {
         for (i in 1..5) {
             delay(1000)
-            emit(Result.success(CounterOutput(i)))
+            emit(CounterOutput(i))
         }
     }
 }
