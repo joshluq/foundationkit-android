@@ -188,7 +188,7 @@ fun UseCaseDemo() {
                     flowResults.clear()
                     val flowUseCase = GetCounterFlowUseCase()
                     flowUseCase(NoneInput).collect { result ->
-                        result.onSuccess { flowResults.add(it.value) }
+                        flowResults.add(result.value)
                     }
                 }
             },
