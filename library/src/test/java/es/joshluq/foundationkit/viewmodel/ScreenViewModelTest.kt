@@ -42,7 +42,7 @@ class ScreenViewModelTest {
 
         override fun handleEvent(event: TestEvent) {
             when (event) {
-                TestEvent.Increment -> updateState { it.copy(count = it.count + 1) }
+                TestEvent.Increment -> updateState { copy(count = count + 1) }
                 is TestEvent.TriggerEffect -> launchEffect(TestEffect.ShowMessage(event.message))
             }
         }
