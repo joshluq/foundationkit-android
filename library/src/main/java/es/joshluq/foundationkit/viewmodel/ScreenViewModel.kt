@@ -1,14 +1,12 @@
 package es.joshluq.foundationkit.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 /**
  * Base class for ViewModels that follow the MVI pattern.
@@ -32,9 +30,11 @@ abstract class ScreenViewModel<State : UiState, Event : UiEvent, Effect : UiEffe
 
     /**
      * Updates the current state.
-     * @param function A function that takes the current state and returns the new state.
+     * Use this method to modify the state in a thread-safe manner.
+     *
+     * @param function A lambda with the current state as receiver, returning the new state.
      */
-    protected fun updateState(function: (State) -> State) {
+    protected fun updateState(function: State.() -> State) {
         _state.update(function)
     }
 
@@ -52,7 +52,7 @@ abstract class ScreenViewModel<State : UiState, Event : UiEvent, Effect : UiEffe
      */
     protected abstract fun handleEvent(event: Event)
 
-    private val effectChannel = Channel<Effect>()
+    private val effectChannel = Channel<Effect>(Channel.BUFFERED)
 
     /**
      * A flow of side effects that should be handled by the UI.
@@ -64,8 +64,6 @@ abstract class ScreenViewModel<State : UiState, Event : UiEvent, Effect : UiEffe
      * @param effect The effect to launch.
      */
     protected fun launchEffect(effect: Effect) {
-        viewModelScope.launch {
-            effectChannel.send(effect)
-        }
+        effectChannel.trySend(effect)
     }
 }

@@ -54,12 +54,13 @@ sealed interface ShowcaseEffect : UiEffect {
 }
 
 class ShowcaseViewModel : ScreenViewModel<ShowcaseState, ShowcaseEvent, ShowcaseEffect>() {
+
     override fun createInitialState(): ShowcaseState = ShowcaseState()
 
     override fun handleEvent(event: ShowcaseEvent) {
         when (event) {
             ShowcaseEvent.OnIncrementClick -> {
-                updateState { it.copy(counter = it.counter + 1) }
+                updateState { copy(counter = counter + 1) }
             }
             ShowcaseEvent.OnShowToastClick -> {
                 launchEffect(ShowcaseEffect.ShowToast("Counter is: ${state.value.counter}"))

@@ -101,19 +101,19 @@ private class AndroidLogProvider(
     private val useEmojis: Boolean
 ) : LogProvider {
     override fun log(priority: LogLevel, tag: String, message: String, throwable: Throwable?) {
-        if (priority.priority >= minLogLevel.priority) {
-            val decoratedTag = if (tagPrefix.isNotEmpty()) "$tagPrefix [$tag]" else tag
-            val decoratedMessage = decorateMessage(priority, message)
+        if (priority.priority < minLogLevel.priority) return
 
-            when (priority) {
-                LogLevel.VERBOSE -> Log.v(decoratedTag, decoratedMessage, throwable)
-                LogLevel.DEBUG -> Log.d(decoratedTag, decoratedMessage, throwable)
-                LogLevel.INFO -> Log.i(decoratedTag, decoratedMessage, throwable)
-                LogLevel.WARN -> Log.w(decoratedTag, decoratedMessage, throwable)
-                LogLevel.ERROR -> Log.e(decoratedTag, decoratedMessage, throwable)
-                LogLevel.ASSERT -> Log.wtf(decoratedTag, decoratedMessage, throwable)
-                LogLevel.NONE -> { /* No-op */ }
-            }
+        val decoratedTag = if (tagPrefix.isNotEmpty()) "$tagPrefix [$tag]" else tag
+        val decoratedMessage = decorateMessage(priority, message)
+
+        when (priority) {
+            LogLevel.VERBOSE -> Log.v(decoratedTag, decoratedMessage, throwable)
+            LogLevel.DEBUG -> Log.d(decoratedTag, decoratedMessage, throwable)
+            LogLevel.INFO -> Log.i(decoratedTag, decoratedMessage, throwable)
+            LogLevel.WARN -> Log.w(decoratedTag, decoratedMessage, throwable)
+            LogLevel.ERROR -> Log.e(decoratedTag, decoratedMessage, throwable)
+            LogLevel.ASSERT -> Log.wtf(decoratedTag, decoratedMessage, throwable)
+            LogLevel.NONE -> { /* No-op */ }
         }
     }
 
