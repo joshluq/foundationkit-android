@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.LibraryExtension
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 
 plugins {
     alias(libs.plugins.pluginkit.android.library)
@@ -47,4 +48,8 @@ androidPublishing {
     version = "${project.version}${project.findProperty("versionType")}"
     groupId = project.group.toString()
     artifactId = providers.gradleProperty("artifactId").get()
+}
+
+tasks.withType<GenerateModuleMetadata>().configureEach {
+    suppressedValidationErrors.add("enforced-platform")
 }
