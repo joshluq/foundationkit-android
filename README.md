@@ -11,10 +11,13 @@ FoundationKit provides the base abstractions, common interfaces, and essential u
 
 ## 🚀 Features
 
-- 🛠 **Core Abstractions**: Common interfaces for Clean Architecture (UseCases).
-- 🏗 **MVI Foundation**: Base classes for State-Event-Effect architecture.
+- 🛠 **Core Abstractions**: Common interfaces for Clean Architecture (`UseCase`, `FlowUseCase`).
+- 🏗 **MVI Foundation**: Base classes for State-Event-Effect architecture (`ScreenViewModel`).
 - 🪵 **Loggerkit**: A flexible, decorator-based logging system.
-- 🧩 **Consistency**: Unified coding style and architectural patterns.
+- 🧵 **Concurrency & Coroutines**: Injectable `DispatcherProvider`, `launchSafe`, and lifecycle-aware `ScopeOwner`.
+- 💬 **TextProvider**: Decoupled text management for ViewModels (Strings, Resources, Compose).
+- 📊 **ListState**: Exhaustive state management for data collections (Idle, Loading, Success, Empty, Error).
+- 🗺 **Mapping Utilities**: Generic `Mappable` and `Model` interfaces for data transformation.
 - 📱 **Showcase App**: Integrated demonstration of all components.
 
 ---
@@ -25,7 +28,7 @@ Add the dependency to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("es.joshluq.kit:foundationkit:x.y.z")
+    implementation("es.joshluq.kit:foundationkit:1.1.0")
 }
 ```
 
@@ -37,49 +40,59 @@ dependencies {
 A robust logging utility that follows Dependency Inversion.
 
 ```kotlin
-// Initialization (Defaults: Loggerkit -> TAG, Emojis, Thread Info)
 val logger = Loggerkit.Builder().build()
-
 logger.i("Tag", "Hello FoundationKit!") 
-// Output: Loggerkit -> Tag: ℹ️ [main] Hello FoundationKit!
-
-// Custom Configuration
-val customLogger = Loggerkit.Builder()
-    .setProvider(LoggerDefaults.defaultLogProvider(
-        minLogLevel = LogLevel.DEBUG,
-        tagPrefix = "MyApp",
-        showThread = false
-    ))
-    .build()
 ```
 
-### 2. UseCase & FlowUseCase
-Standardized interfaces for business logic execution.
+### 2. Concurrency & Coroutines
+Infrastructure for testable and safe asynchronous tasks.
 
 ```kotlin
-// Standard UseCase (Suspend)
-class MyUseCase : UseCase<MyInput, MyOutput> {
-    override suspend fun invoke(input: MyInput): Result<MyOutput> { ... }
+// Injectable Dispatchers
+class MyRepository @Inject constructor(private val dispatchers: DispatcherProvider) {
+    suspend fun doWork() = withContext(dispatchers.io) { ... }
 }
 
-// Reactive UseCase (Flow)
-class MyFlowUseCase : FlowUseCase<NoneInput, MyOutput> {
-    override fun invoke(input: NoneInput): Flow<Result<MyOutput>> { ... }
+// Safe launching with automatic logging
+viewModelScope.launchSafe(logger = logger, onError = { /* Handle error */ }) {
+    // Suspend work
+}
+
+// Safe execution with Result
+val result = safeRun(logger) { api.call() }
+```
+
+### 3. TextProvider
+Handle strings in ViewModels without `Context` or `R.string`.
+
+```kotlin
+val text = TextProvider.Resource(R.string.welcome_message, "User")
+// Resolve in UI
+val string = text.asString(context) 
+// Resolve in Compose
+val string = text.asString() 
+```
+
+### 4. ListState
+Standardized state for collections.
+
+```kotlin
+val state: ListState<User> = users.toListState()
+when (state) {
+    is ListState.Loading -> ShowLoader()
+    is ListState.Success -> ShowList(state.data)
+    is ListState.Error -> ShowError(state.message.asString())
+    is ListState.Empty -> ShowEmpty()
 }
 ```
 
-### 3. ScreenViewModel (MVI)
+### 5. ScreenViewModel (MVI)
 Base class to implement Unidirectional Data Flow (UDF).
 
 ```kotlin
 class MyViewModel : ScreenViewModel<MyState, MyEvent, MyEffect>() {
     override fun createInitialState() = MyState()
-
-    override fun handleEvent(event: MyEvent) {
-        when (event) {
-            is MyEvent.Refresh -> updateState { it.copy(isLoading = true) }
-        }
-    }
+    override fun handleEvent(event: MyEvent) { ... }
 }
 ```
 
@@ -87,20 +100,6 @@ class MyViewModel : ScreenViewModel<MyState, MyEvent, MyEffect>() {
 
 ## 📱 Showcase
 The project includes a `:showcase` module where you can see all these components working together in a real Android app with Jetpack Compose.
-
----
-
-## 🛠 Building & Testing
-
-### Compile the library
-```bash
-./gradlew :library:assemble
-```
-
-### Run tests
-```bash
-./gradlew :library:test
-```
 
 ---
 

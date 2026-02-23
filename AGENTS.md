@@ -18,6 +18,12 @@ FoundationKit is the **fundamental pillar** of our suite. It provides the base a
 - **Concurrency**: Kotlin Coroutines & Flow
 - **Minimum SDK**: Defined in the root build configuration.
 
+## Key Modules & Abstractions
+- **Loggerkit**: Decorator-based logging system (`Loggerkit`, `LogProvider`).
+- **Clean Architecture**: Standardized `UseCase` and `FlowUseCase` with `UseCaseInput`/`UseCaseOutput`.
+- **MVI Foundation**: `ScreenViewModel` for Unidirectional Data Flow.
+- **Data Mapping**: `Mappable` and `Model` interfaces for layer transformation.
+
 ## Guiding Principles
 1. **Zero unnecessary dependencies**: Keep the core lightweight. Avoid adding dependencies that feature kits might not need.
 2. **High extensibility**: Design for inheritance and composition. Use the "open-closed" principle.
