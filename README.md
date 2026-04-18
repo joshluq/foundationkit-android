@@ -18,6 +18,8 @@ FoundationKit provides the base abstractions, common interfaces, and essential u
 - 💬 **TextProvider**: Decoupled text management for ViewModels (Strings, Resources, Compose).
 - 📊 **ListState**: Exhaustive state management for data collections (Idle, Loading, Success, Empty, Error).
 - 🗺 **Mapping Utilities**: Generic `Mappable` and `Model` interfaces for data transformation.
+- 💾 **Storage & Persistence**: Flexible `StorageProvider` with `Cache` and `SharedPreferences` implementations.
+- 🏗 **Managers & Providers**: Base abstractions for decoupled service management and implementation.
 - 📱 **Showcase App**: Integrated demonstration of all components.
 
 ---
@@ -93,6 +95,31 @@ Base class to implement Unidirectional Data Flow (UDF).
 class MyViewModel : ScreenViewModel<MyState, MyEvent, MyEffect>() {
     override fun createInitialState() = MyState()
     override fun handleEvent(event: MyEvent) { ... }
+}
+```
+
+### 6. Storage & Persistence
+Flexible storage system using providers.
+
+```kotlin
+// SharedPreferences implementation with serialization
+val storage = SharedPreferencesStorageProvider(sharedPrefs, gsonSerializer)
+storage.save("user_key", user)
+val user = storage.read<User>("user_key")
+```
+
+### 7. Managers & Providers
+FoundationKit uses a **Provider-Manager** pattern to decouple implementation from definition.
+
+- **Providers**: Interfaces that define a specific service (e.g., `AnalyticsProvider`, `StorageProvider`).
+- **Managers**: Abstract classes that coordinate one or more providers and manage their lifecycle/configuration.
+
+```kotlin
+// Example of a Manager implementation
+class MyManager : Manager<MyConfig>() {
+    override fun onInitialize() {
+        // Setup with config
+    }
 }
 ```
 
