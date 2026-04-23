@@ -1,12 +1,13 @@
 package es.joshluq.foundationkit.storage
 
 import es.joshluq.foundationkit.provider.StorageProvider
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Implementation of [StorageProvider] that uses an in-memory cache.
  */
 class CacheStorageProvider : StorageProvider {
-    private val cache = mutableMapOf<String, Any>()
+    private val cache = ConcurrentHashMap<String, Any>()
 
     override fun <T : Any> save(key: String, value: T, type: Class<T>) {
         cache[key] = value
