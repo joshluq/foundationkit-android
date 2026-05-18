@@ -9,12 +9,12 @@ import java.util.concurrent.ConcurrentHashMap
 class CacheStorageProvider : StorageProvider {
     private val cache = ConcurrentHashMap<String, Any>()
 
-    override fun <T : Any> save(key: String, value: T, type: Class<T>) {
+    override suspend fun <T : Any> save(key: String, value: T, type: Class<T>) {
         cache[key] = value
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> read(key: String, type: Class<T>): T? {
+    override suspend fun <T : Any> read(key: String, type: Class<T>): T? {
         val value = cache[key]
         return if (type.isInstance(value)) {
             value as T
@@ -23,11 +23,11 @@ class CacheStorageProvider : StorageProvider {
         }
     }
 
-    override fun delete(key: String) {
+    override suspend fun delete(key: String) {
         cache.remove(key)
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         cache.clear()
     }
 }

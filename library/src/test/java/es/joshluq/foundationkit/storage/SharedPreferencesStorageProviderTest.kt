@@ -2,6 +2,7 @@ package es.joshluq.foundationkit.storage
 
 import android.content.SharedPreferences
 import es.joshluq.foundationkit.provider.SerializerProvider
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -20,7 +21,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read String should work`() {
+    fun `save and read String should work`() = runTest {
         val key = "testKey"
         val value = "testValue"
         storageProvider.save(key, value, String::class.java)
@@ -28,7 +29,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read Int should work`() {
+    fun `save and read Int should work`() = runTest {
         val key = "testKey"
         val value = 42
         storageProvider.save(key, value, Int::class.java)
@@ -36,7 +37,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read Long should work`() {
+    fun `save and read Long should work`() = runTest {
         val key = "testKey"
         val value = 123456789L
         storageProvider.save(key, value, Long::class.java)
@@ -44,7 +45,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read Float should work`() {
+    fun `save and read Float should work`() = runTest {
         val key = "testKey"
         val value = 3.14f
         storageProvider.save(key, value, Float::class.java)
@@ -52,7 +53,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read Boolean should work`() {
+    fun `save and read Boolean should work`() = runTest {
         val key = "testKey"
         val value = true
         storageProvider.save(key, value, Boolean::class.java)
@@ -60,7 +61,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `save and read complex object should use serializer`() {
+    fun `save and read complex object should use serializer`() = runTest {
         val key = "complexKey"
         val value = ComplexObject("John", 30)
         
@@ -77,12 +78,12 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `read non-existent key should return null`() {
+    fun `read non-existent key should return null`() = runTest {
         assertNull(storageProvider.read("unknown", String::class.java))
     }
 
     @Test
-    fun `delete should remove the key`() {
+    fun `delete should remove the key`() = runTest {
         val key = "testKey"
         storageProvider.save(key, "value", String::class.java)
         assertTrue(fakeSharedPreferences.contains(key))
@@ -92,7 +93,7 @@ class SharedPreferencesStorageProviderTest {
     }
 
     @Test
-    fun `clear should remove all keys`() {
+    fun `clear should remove all keys`() = runTest {
         storageProvider.save("key1", "val1", String::class.java)
         storageProvider.save("key2", "val2", String::class.java)
         

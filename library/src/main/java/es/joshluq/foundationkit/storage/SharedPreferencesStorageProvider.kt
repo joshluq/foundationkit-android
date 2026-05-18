@@ -16,7 +16,7 @@ class SharedPreferencesStorageProvider(
     private val serializer: SerializerProvider
 ) : StorageProvider {
 
-    override fun <T : Any> save(key: String, value: T, type: Class<T>) {
+    override suspend fun <T : Any> save(key: String, value: T, type: Class<T>) {
         sharedPreferences.edit {
             when (value) {
                 is String -> putString(key, value)
@@ -33,7 +33,7 @@ class SharedPreferencesStorageProvider(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> read(key: String, type: Class<T>): T? {
+    override suspend fun <T : Any> read(key: String, type: Class<T>): T? {
         if (!sharedPreferences.contains(key)) return null
 
         return when (type) {
@@ -49,11 +49,11 @@ class SharedPreferencesStorageProvider(
         }
     }
 
-    override fun delete(key: String) {
+    override suspend fun delete(key: String) {
         sharedPreferences.edit { remove(key) }
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         sharedPreferences.edit { clear() }
     }
 }
