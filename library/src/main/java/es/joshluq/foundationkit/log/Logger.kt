@@ -26,7 +26,7 @@ interface LogProvider {
 /**
  * Interface for logging operations, following Dependency Inversion.
  */
-interface Loggerkit {
+interface LoggerKit {
     fun v(tag: String, message: String, throwable: Throwable? = null)
     fun d(tag: String, message: String, throwable: Throwable? = null)
     fun i(tag: String, message: String, throwable: Throwable? = null)
@@ -35,7 +35,7 @@ interface Loggerkit {
     fun wtf(tag: String, message: String, throwable: Throwable? = null)
 
     /**
-     * Builder for creating [Loggerkit] instances.
+     * Builder for creating [LoggerKit] instances.
      */
     class Builder {
         private var provider: LogProvider = LoggerDefaults.defaultLogProvider()
@@ -44,14 +44,14 @@ interface Loggerkit {
             this.provider = provider
         }
 
-        fun build(): Loggerkit = FoundationLogger(provider)
+        fun build(): LoggerKit = FoundationLogger(provider)
     }
 }
 
 /**
- * Default implementation of [Loggerkit].
+ * Default implementation of [LoggerKit].
  */
-private class FoundationLogger(private val provider: LogProvider) : Loggerkit {
+private class FoundationLogger(private val provider: LogProvider) : LoggerKit {
     override fun v(tag: String, message: String, throwable: Throwable?) =
         provider.log(LogLevel.VERBOSE, tag, message, throwable)
 
@@ -79,13 +79,13 @@ object LoggerDefaults {
      * Provides the default Android implementation of [LogProvider].
      *
      * @param minLogLevel Minimum level to log.
-     * @param tagPrefix Global prefix for all tags (e.g., "Loggerkit").
+     * @param tagPrefix Global prefix for all tags (e.g., "LoggerKit").
      * @param showThread Whether to include the thread name in the message.
      * @param useEmojis Whether to prepend an emoji representing the log level.
      */
     fun defaultLogProvider(
         minLogLevel: LogLevel = LogLevel.VERBOSE,
-        tagPrefix: String = "Loggerkit",
+        tagPrefix: String = "LoggerKit",
         showThread: Boolean = true,
         useEmojis: Boolean = true
     ): LogProvider = AndroidLogProvider(minLogLevel, tagPrefix, showThread, useEmojis)
