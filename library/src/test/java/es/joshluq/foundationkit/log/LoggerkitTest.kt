@@ -3,12 +3,12 @@ package es.joshluq.foundationkit.log
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class LoggerkitTest {
+internal class LoggerKitTest {
 
     @Test
-    fun `Loggerkit with custom provider should call log method`() {
+    fun `LoggerKit with custom provider should call log method`() {
         val mockProvider = TestLogProvider()
-        val logger = Loggerkit.Builder()
+        val logger = LoggerKit.Builder()
             .setProvider(mockProvider)
             .build()
 
@@ -23,9 +23,9 @@ class LoggerkitTest {
     }
 
     @Test
-    fun `Loggerkit should trigger all log levels`() {
+    fun `LoggerKit should trigger all log levels`() {
         val mockProvider = TestLogProvider()
-        val logger = Loggerkit.Builder()
+        val logger = LoggerKit.Builder()
             .setProvider(mockProvider)
             .build()
 

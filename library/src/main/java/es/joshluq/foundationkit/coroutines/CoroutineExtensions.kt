@@ -1,6 +1,6 @@
 package es.joshluq.foundationkit.coroutines
 
-import es.joshluq.foundationkit.log.Loggerkit
+import es.joshluq.foundationkit.log.LoggerKit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,14 +17,14 @@ import kotlin.coroutines.EmptyCoroutineContext
  * don't crash the application and provide a unified way to handle errors.
  *
  * @param context Additional to [CoroutineScope.coroutineContext] context of the coroutine.
- * @param logger Optional [Loggerkit] to automatically log errors.
+ * @param logger Optional [LoggerKit] to automatically log errors.
  * @param onError Optional callback invoked when an exception is caught.
  * @param block The suspendable block of code to execute.
  * @return The [Job] representing the launched coroutine.
  */
 fun CoroutineScope.launchSafe(
     context: CoroutineContext = EmptyCoroutineContext,
-    logger: Loggerkit? = null,
+    logger: LoggerKit? = null,
     onError: ((Throwable) -> Unit)? = null,
     block: suspend CoroutineScope.() -> Unit
 ): Job {
@@ -46,15 +46,15 @@ fun CoroutineScope.launchSafe(
 /**
  * Executes a suspendable block of code safely, returning a [Result].
  *
- * If an exception occurs, it is automatically logged using the provided [Loggerkit]
+ * If an exception occurs, it is automatically logged using the provided [LoggerKit]
  * with the "SafeRunner" tag before returning a [Result.failure].
  *
- * @param logger The [Loggerkit] instance to use for error reporting.
+ * @param logger The [LoggerKit] instance to use for error reporting.
  * @param block The suspendable block to execute.
  * @return A [Result] containing the success value or the caught exception.
  */
 suspend fun <T> safeRun(
-    logger: Loggerkit? = null,
+    logger: LoggerKit? = null,
     block: suspend () -> T
 ): Result<T> {
     return try {

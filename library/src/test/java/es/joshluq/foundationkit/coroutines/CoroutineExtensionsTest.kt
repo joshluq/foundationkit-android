@@ -2,7 +2,7 @@ package es.joshluq.foundationkit.coroutines
 
 import es.joshluq.foundationkit.log.LogLevel
 import es.joshluq.foundationkit.log.LogProvider
-import es.joshluq.foundationkit.log.Loggerkit
+import es.joshluq.foundationkit.log.LoggerKit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -29,7 +29,7 @@ class CoroutineExtensionsTest {
     @Test
     fun `launchSafe logs error when logger is provided`() = runTest {
         val testProvider = TestLogProvider()
-        val logger = Loggerkit.Builder().setProvider(testProvider).build()
+        val logger = LoggerKit.Builder().setProvider(testProvider).build()
         val exception = RuntimeException("Logging Test")
 
         launchSafe(
@@ -56,7 +56,7 @@ class CoroutineExtensionsTest {
     @Test
     fun `safeRun returns failure Result and logs error`() = runTest {
         val testProvider = TestLogProvider()
-        val logger = Loggerkit.Builder().setProvider(testProvider).build()
+        val logger = LoggerKit.Builder().setProvider(testProvider).build()
         val exception = RuntimeException("SafeRunner Test")
 
         val result = safeRun(logger = logger) {
