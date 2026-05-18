@@ -1,5 +1,6 @@
 package es.joshluq.foundationkit.storage
 
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -18,7 +19,7 @@ class CacheStorageProviderTest {
     }
 
     @Test
-    fun `save and read should work correctly`() {
+    fun `save and read should work correctly`() = runTest {
         val key = "testKey"
         val value = "testValue"
 
@@ -29,13 +30,13 @@ class CacheStorageProviderTest {
     }
 
     @Test
-    fun `read should return null if key does not exist`() {
+    fun `read should return null if key does not exist`() = runTest {
         val result = storageProvider.read("nonExistentKey", String::class.java)
         assertNull(result)
     }
 
     @Test
-    fun `read should return null if type does not match`() {
+    fun `read should return null if type does not match`() = runTest {
         val key = "testKey"
         storageProvider.save(key, 123, Int::class.java)
 
@@ -44,7 +45,7 @@ class CacheStorageProviderTest {
     }
 
     @Test
-    fun `delete should remove the value`() {
+    fun `delete should remove the value`() = runTest {
         val key = "testKey"
         storageProvider.save(key, "value", String::class.java)
         storageProvider.delete(key)
@@ -54,7 +55,7 @@ class CacheStorageProviderTest {
     }
 
     @Test
-    fun `clear should remove all values`() {
+    fun `clear should remove all values`() = runTest {
         storageProvider.save("key1", "value1", String::class.java)
         storageProvider.save("key2", "value2", String::class.java)
         storageProvider.clear()
@@ -64,7 +65,7 @@ class CacheStorageProviderTest {
     }
 
     @Test
-    fun `concurrency test - multiple threads saving and reading`() {
+    fun `concurrency test - multiple threads saving and reading`() = runTest {
         val numberOfThreads = 100
         val iterationsPerThread = 100
         val executorService = Executors.newFixedThreadPool(numberOfThreads)
@@ -73,11 +74,13 @@ class CacheStorageProviderTest {
         for (i in 0 until numberOfThreads) {
             executorService.execute {
                 try {
-                    for (j in 0 until iterationsPerThread) {
-                        val key = "key_${i}_${j}"
-                        val value = "value_${i}_${j}"
-                        storageProvider.save(key, value, String::class.java)
-                        assertEquals(value, storageProvider.read(key, String::class.java))
+                    kotlinx.coroutines.runBlocking {
+                        for (j in 0 until iterationsPerThread) {
+                            val key = "key_${i}_${j}"
+                            val value = "value_${i}_${j}"
+                            storageProvider.save(key, value, String::class.java)
+                            assertEquals(value, storageProvider.read(key, String::class.java))
+                        }
                     }
                 } finally {
                     latch.countDown()
