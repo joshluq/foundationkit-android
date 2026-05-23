@@ -23,6 +23,60 @@ FoundationKit is the **fundamental pillar** of our suite. It provides the base a
 - **Clean Architecture**: Standardized `UseCase` and `FlowUseCase` with `UseCaseInput`/`UseCaseOutput`.
 - **MVI Foundation**: `ScreenViewModel` for Unidirectional Data Flow.
 - **Data Mapping**: `Mappable` and `Model` interfaces for layer transformation.
+- **DSL Initialization**: Official standard for Manager instantiation using `ContextManagerFactory`, `ManagerFactory` and `ConfigBuilder`.
+
+## DSL Initialization Pattern (Standard)
+All SDKs must follow the DSL-first initialization pattern to provide a consistent developer experience. There are two flavors depending on whether the SDK requires an Android `Context`.
+
+### Flavor A: Context-Aware Manager (Standard)
+Use this for SDKs that interact with Android components (Storage, UI, etc.).
+
+```kotlin
+// 1. Define Config
+class MyConfig(val apiKey: String, val context: Context) : ManagerConfig
+
+// 2. Define DSL Builder
+class MyConfigBuilder(override val context: Context) : ContextConfigBuilder<MyConfig> {
+    var apiKey: String = ""
+    override fun build() = MyConfig(apiKey, context)
+}
+
+// 3. Define Manager & Factory
+class MyManager : Manager<MyConfig>() {
+    companion object : ContextManagerFactory<MyManager, MyConfig, MyConfigBuilder> {
+        override val builder = MyManagerBuilder()
+        override fun createBuilder(context: Context) = MyConfigBuilder(context)
+    }
+}
+
+// Usage
+val manager = MyManager.build(context) { apiKey = "XYZ-123" }
+```
+
+### Flavor B: Pure Logic Manager
+Use this for SDKs that only contain pure Kotlin/Java logic (Crypto, Math, etc.).
+
+```kotlin
+// 1. Define Config
+class PureConfig(val precision: Int) : ManagerConfig
+
+// 2. Define DSL Builder
+class PureConfigBuilder : ConfigBuilder<PureConfig> {
+    var precision: Int = 2
+    override fun build() = PureConfig(precision)
+}
+
+// 3. Define Manager & Factory
+class PureManager : Manager<PureConfig>() {
+    companion object : ManagerFactory<PureManager, PureConfig, PureConfigBuilder> {
+        override val builder = PureManagerBuilder()
+        override fun createBuilder() = PureConfigBuilder()
+    }
+}
+
+// Usage
+val manager = PureManager.build { precision = 4 }
+```
 
 ## Guiding Principles
 1. **Zero unnecessary dependencies**: Keep the core lightweight. Avoid adding dependencies that feature kits might not need.
