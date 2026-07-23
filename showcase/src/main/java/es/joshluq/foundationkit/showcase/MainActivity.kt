@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import es.joshluq.foundationkit.log.Loggerkit
+import es.joshluq.foundationkit.log.LoggerKit
 import es.joshluq.foundationkit.showcase.ui.theme.ShowcaseTheme
 import es.joshluq.foundationkit.usecase.NoneInput
 import es.joshluq.foundationkit.viewmodel.ScreenViewModel
@@ -73,7 +73,7 @@ class ShowcaseViewModel : ScreenViewModel<ShowcaseState, ShowcaseEvent, Showcase
 
 class MainActivity : ComponentActivity() {
 
-    private val logger: Loggerkit = Loggerkit.Builder().build()
+    private val logger: LoggerKit = LoggerKit.Builder().build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoggerDemo(logger: Loggerkit) {
+fun LoggerDemo(logger: LoggerKit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
