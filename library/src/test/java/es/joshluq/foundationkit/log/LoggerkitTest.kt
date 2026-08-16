@@ -9,7 +9,7 @@ internal class LoggerKitTest {
     fun `LoggerKit with custom provider should call log method`() {
         val mockProvider = TestLogProvider()
         val logger = LoggerKit.Builder()
-            .setProvider(mockProvider)
+            .addProvider(mockProvider)
             .build()
 
         val tag = "TestTag"
@@ -26,7 +26,7 @@ internal class LoggerKitTest {
     fun `LoggerKit should trigger all log levels`() {
         val mockProvider = TestLogProvider()
         val logger = LoggerKit.Builder()
-            .setProvider(mockProvider)
+            .addProvider(mockProvider)
             .build()
 
         logger.v("T", "M")
@@ -46,6 +46,29 @@ internal class LoggerKitTest {
         
         logger.wtf("T", "M")
         assertEquals(LogLevel.ASSERT, mockProvider.lastPriority)
+    }
+
+    @Test
+    fun `LoggerKit with multiple providers should notify all of them`() {
+        val provider1 = TestLogProvider()
+        val provider2 = TestLogProvider()
+        val logger = LoggerKit.Builder()
+            .addProvider(provider1)
+            .addProvider(provider2)
+            .build()
+
+        val tag = "MultiTag"
+        val message = "Multi Message"
+
+        logger.i(tag, message)
+
+        assertEquals(LogLevel.INFO, provider1.lastPriority)
+        assertEquals(tag, provider1.lastTag)
+        assertEquals(message, provider1.lastMessage)
+
+        assertEquals(LogLevel.INFO, provider2.lastPriority)
+        assertEquals(tag, provider2.lastTag)
+        assertEquals(message, provider2.lastMessage)
     }
 
     /**

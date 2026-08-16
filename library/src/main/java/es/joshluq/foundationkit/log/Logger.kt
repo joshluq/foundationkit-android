@@ -38,37 +38,42 @@ interface LoggerKit {
      * Builder for creating [LoggerKit] instances.
      */
     class Builder {
-        private var provider: LogProvider = LoggerDefaults.defaultLogProvider()
+        private val providers = mutableListOf<LogProvider>()
 
-        fun setProvider(provider: LogProvider) = apply {
-            this.provider = provider
+        fun addProvider(provider: LogProvider) = apply {
+            this.providers.add(provider)
         }
 
-        fun build(): LoggerKit = FoundationLogger(provider)
+        fun build(): LoggerKit {
+            if (providers.isEmpty()) {
+                providers.add(LoggerDefaults.defaultLogProvider())
+            }
+            return FoundationLogger(providers.toList())
+        }
     }
 }
 
 /**
  * Default implementation of [LoggerKit].
  */
-private class FoundationLogger(private val provider: LogProvider) : LoggerKit {
+private class FoundationLogger(private val providers: List<LogProvider>) : LoggerKit {
     override fun v(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.VERBOSE, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.VERBOSE, tag, message, throwable) }
 
     override fun d(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.DEBUG, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.DEBUG, tag, message, throwable) }
 
     override fun i(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.INFO, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.INFO, tag, message, throwable) }
 
     override fun w(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.WARN, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.WARN, tag, message, throwable) }
 
     override fun e(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.ERROR, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.ERROR, tag, message, throwable) }
 
     override fun wtf(tag: String, message: String, throwable: Throwable?) =
-        provider.log(LogLevel.ASSERT, tag, message, throwable)
+        providers.forEach { it.log(LogLevel.ASSERT, tag, message, throwable) }
 }
 
 /**
