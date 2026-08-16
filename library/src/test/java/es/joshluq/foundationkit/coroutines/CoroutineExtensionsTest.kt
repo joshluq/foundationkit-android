@@ -29,7 +29,7 @@ class CoroutineExtensionsTest {
     @Test
     fun `launchSafe logs error when logger is provided`() = runTest {
         val testProvider = TestLogProvider()
-        val logger = LoggerKit.Builder().setProvider(testProvider).build()
+        val logger = LoggerKit.Builder().addProvider(testProvider).build()
         val exception = RuntimeException("Logging Test")
 
         launchSafe(
@@ -56,7 +56,7 @@ class CoroutineExtensionsTest {
     @Test
     fun `safeRun returns failure Result and logs error`() = runTest {
         val testProvider = TestLogProvider()
-        val logger = LoggerKit.Builder().setProvider(testProvider).build()
+        val logger = LoggerKit.Builder().addProvider(testProvider).build()
         val exception = RuntimeException("SafeRunner Test")
 
         val result = safeRun(logger = logger) {
