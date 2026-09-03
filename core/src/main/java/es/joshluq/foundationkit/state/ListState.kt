@@ -58,7 +58,7 @@ val ListState<*>.isError: Boolean
     get() = this is ListState.Error
 
 /**
- * Returns the data if the state is [ListState.Success], otherwise null.
+ * Returns the data if the state is [Success], otherwise null.
  */
 fun <T> ListState<T>.getOrNull(): List<T>? = (this as? ListState.Success)?.data
 
