@@ -50,11 +50,3 @@ androidPublishing {
     groupId = project.group.toString()
     artifactId = providers.gradleProperty("artifactId").get()
 }
-
-tasks.withType<GenerateModuleMetadata>().configureEach {
-    suppressedValidationErrors.add("enforced-platform")
-}
-
-tasks.withType<Detekt>().configureEach {
-    jvmTarget = "17"
-}
