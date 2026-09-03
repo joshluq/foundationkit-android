@@ -1,44 +1,35 @@
 plugins {
     alias(libs.plugins.pluginkit.jvm.library)
-    `maven-publish`
+    alias(libs.plugins.pluginkit.jvm.publishing)
+    alias(libs.plugins.pluginkit.quality)
 }
 
 group = providers.gradleProperty("groupId").get()
 version = providers.gradleProperty("libraryVersion").get()
 
-// Configuración de publicación para GitHub Packages
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-            groupId = project.group.toString()
-            artifactId = "${providers.gradleProperty("artifactId").get()}-core" // -> foundationkit-core
-            version = "${project.version}${project.findProperty("versionType") ?: ""}"
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("${providers.gradleProperty("repositoryUrl").get()}/${providers.gradleProperty("artifactId").get()}-android")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR") ?: providers.gradleProperty("gpr.user").orNull
-                password = System.getenv("GITHUB_TOKEN") ?: providers.gradleProperty("gpr.key").orNull
-            }
-        }
-    }
+jvmPublishing {
+    repoName = "GitHubPackages"
+    repoUrl = "${providers.gradleProperty("repositoryUrl").get()}/${providers.gradleProperty("artifactId").get()}-android"
+    repoUser = System.getenv("GITHUB_ACTOR")
+    repoPassword = System.getenv("GITHUB_TOKEN")
+    version = "${project.version}${project.findProperty("versionType") ?: ""}"
+    groupId = project.group.toString()
+    artifactId = "${providers.gradleProperty("artifactId").get()}-core"
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-}
-
-dependencies{
+dependencies {
     implementation(libs.bundles.testing.unit)
+}
+
+pluginkitQuality {
+    sonarHost = "https://sonarcloud.io"
+    sonarProjectKey = "joshluq_foundationkit-core"
+    koverExclusions = listOf(
+        "**.showcase.*",
+        "**.di.*",
+        "**.*_di_*",
+        "**.BuildConfig",
+        "**.R",
+        "**.R$*"
+    )
 }
