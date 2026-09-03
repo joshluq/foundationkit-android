@@ -48,6 +48,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "foundationkit-android"
+include(":core")
 include(":library")
 include(":showcase")
+project(":core").name = "foundationkit-core"
 project(":library").name = "foundationkit"

@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.LibraryExtension
+import io.gitlab.arturbosch.detekt.Detekt
 import org.gradle.api.publish.tasks.GenerateModuleMetadata
 
 plugins {
@@ -17,7 +18,7 @@ configure<LibraryExtension> {
 }
 
 dependencies {
-
+    api(project(":foundationkit-core"))
 }
 
 pluginkitQuality {
@@ -52,4 +53,8 @@ androidPublishing {
 
 tasks.withType<GenerateModuleMetadata>().configureEach {
     suppressedValidationErrors.add("enforced-platform")
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
 }
