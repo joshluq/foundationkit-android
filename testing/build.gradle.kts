@@ -14,17 +14,18 @@ jvmPublishing {
     repoPassword = System.getenv("GITHUB_TOKEN")
     version = "${project.version}${project.findProperty("versionType") ?: ""}"
     groupId = project.group.toString()
-    artifactId = "${providers.gradleProperty("artifactId").get()}-core"
+    artifactId = "${providers.gradleProperty("artifactId").get()}-testing"
 }
 
 dependencies {
-    api(libs.kotlinx.coroutines.core)
-    testImplementation(libs.bundles.testing.unit)
+    api(project(":foundationkit-core"))
+    api(libs.kotlinx.coroutines.test)
+    api(libs.junit)
 }
 
 pluginkitQuality {
     sonarHost = "https://sonarcloud.io"
-    sonarProjectKey = "joshluq_foundationkit-core"
+    sonarProjectKey = "joshluq_foundationkit-testing"
     koverExclusions = listOf(
         "**.showcase.*",
         "**.di.*",

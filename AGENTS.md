@@ -13,23 +13,39 @@ FoundationKit is the **fundamental pillar** of our suite. It provides the base a
 
 ## Technical Context
 - **Language**: Kotlin
-- **Build System**: Gradle Kotlin DSL (.kts)
+- **JDK Runtime**: Java 21+ (mandatory for Gradle plugins and build-logic)
+- **Build System**: Gradle Kotlin DSL (`.kts`)
 - **Dependency Injection**: Hilt/Dagger
 - **Concurrency**: Kotlin Coroutines & Flow
 - **Minimum SDK**: Defined in the root build configuration.
 
+## Project Structure & Module Mapping
+| Gradle Project Path | Directory | Role | Purity / Platform |
+| :--- | :--- | :--- | :--- |
+| **`:foundationkit-core`** | `/core` | Base abstractions, contracts, pure utilities | **Pure Kotlin / JVM** (No `android.*` or `androidx.*`) |
+| **`:foundationkit`** | `/library` | Android SDK implementations (Context, SharedPreferences, ViewModel) | **Android Library** |
+| **`:foundationkit-testing`** | `/testing` | Test fixtures, `TestDispatcherProvider`, `MainDispatcherRule` | **Pure Kotlin / JVM Test Fixtures** |
+| **`:showcase`** | `/showcase` | Sample application & integration testing | **Android Application** (Consumer-Driven testbed) |
+
+## Specialized Agent Skills (`.agents/skills/`)
+When performing specific engineering tasks, refer to the corresponding skill:
+- **`foundationkit-dsl-builder`**: Building and refactoring Managers, Configs, and DSL Builders.
+- **`core-boundary-guardian`**: Reviewing module boundaries, API purity between `:foundationkit-core` and `:foundationkit`, and KDoc compliance.
+- **`clean-mvi-architect`**: Designing and testing Clean Architecture `UseCase`/`FlowUseCase` and MVI `ScreenViewModel`.
+- **`showcase-consumer-validator`**: Validating new APIs from the consumer perspective in `:showcase` and executing Gradle verification suites.
+
 ## Key Modules & Abstractions
 - **Loggerkit**: Decorator-based logging system (`Loggerkit`, `LogProvider`).
 - **Clean Architecture**: Standardized `UseCase` and `FlowUseCase` with `UseCaseInput`/`UseCaseOutput`.
-- **MVI Foundation**: `ScreenViewModel` for Unidirectional Data Flow.
+- **MVI Foundation**: `ScreenViewModel` for Unidirectional Data Flow (`UiState`, `UiEvent`, `UiEffect`).
 - **Data Mapping**: `Mappable` and `Model` interfaces for layer transformation.
-- **DSL Initialization**: Official standard for Manager instantiation using `ContextManagerFactory`, `ManagerFactory` and `ConfigBuilder`.
+- **DSL Initialization**: Official standard for Manager instantiation using `ContextManagerFactory`, `ManagerFactory`, and `ConfigBuilder`.
 
 ## DSL Initialization Pattern (Standard)
-All SDKs must follow the DSL-first initialization pattern to provide a consistent developer experience. There are two flavors depending on whether the SDK requires an Android `Context`.
+All SDKs must follow the DSL-first initialization pattern. There are two flavors depending on whether the SDK requires an Android `Context`.
 
 ### Flavor A: Context-Aware Manager (Standard)
-Use this for SDKs that interact with Android components (Storage, UI, etc.).
+Use this for SDKs that interact with Android components (Storage, UI, System Services). Always ensure memory safety via `context.toSafeContext()` (Application Context).
 
 ```kotlin
 // 1. Define Config
@@ -38,14 +54,25 @@ class MyConfig(val apiKey: String, val context: Context) : ManagerConfig
 // 2. Define DSL Builder
 class MyConfigBuilder(override val context: Context) : ContextConfigBuilder<MyConfig> {
     var apiKey: String = ""
-    override fun build() = MyConfig(apiKey, context)
+    override fun build(): MyConfig {
+        require(apiKey.isNotBlank()) { "apiKey must not be blank" }
+        return MyConfig(apiKey, context)
+    }
 }
 
 // 3. Define Manager & Factory
-class MyManager : Manager<MyConfig>() {
+class MyManager private constructor() : Manager<MyConfig>() {
     companion object : ContextManagerFactory<MyManager, MyConfig, MyConfigBuilder> {
-        override val builder = MyManagerBuilder()
-        override fun createBuilder(context: Context) = MyConfigBuilder(context)
+        override val builder: ManagerBuilder<MyConfig, MyManager> = MyManagerBuilder()
+        override fun createBuilder(context: Context): MyConfigBuilder = MyConfigBuilder(context)
+    }
+
+    private class MyManagerBuilder : ManagerBuilder<MyConfig, MyManager> {
+        override fun build(config: MyConfig): MyManager {
+            val manager = MyManager()
+            manager.config = config
+            return manager
+        }
     }
 }
 
@@ -54,7 +81,7 @@ val manager = MyManager.build(context) { apiKey = "XYZ-123" }
 ```
 
 ### Flavor B: Pure Logic Manager
-Use this for SDKs that only contain pure Kotlin/Java logic (Crypto, Math, etc.).
+Use this for SDKs that only contain pure Kotlin/Java logic (Crypto, Math, Parsing).
 
 ```kotlin
 // 1. Define Config
@@ -63,14 +90,25 @@ class PureConfig(val precision: Int) : ManagerConfig
 // 2. Define DSL Builder
 class PureConfigBuilder : ConfigBuilder<PureConfig> {
     var precision: Int = 2
-    override fun build() = PureConfig(precision)
+    override fun build(): PureConfig {
+        require(precision >= 0) { "precision must be non-negative" }
+        return PureConfig(precision)
+    }
 }
 
 // 3. Define Manager & Factory
-class PureManager : Manager<PureConfig>() {
+class PureManager private constructor() : Manager<PureConfig>() {
     companion object : ManagerFactory<PureManager, PureConfig, PureConfigBuilder> {
-        override val builder = PureManagerBuilder()
-        override fun createBuilder() = PureConfigBuilder()
+        override val builder: ManagerBuilder<PureConfig, PureManager> = PureManagerBuilder()
+        override fun createBuilder(): PureConfigBuilder = PureConfigBuilder()
+    }
+
+    private class PureManagerBuilder : ManagerBuilder<PureConfig, PureManager> {
+        override fun build(config: PureConfig): PureManager {
+            val manager = PureManager()
+            manager.config = config
+            return manager
+        }
     }
 }
 
@@ -88,4 +126,4 @@ val manager = PureManager.build { precision = 4 }
 - When creating new base components, always ask: "Does this belong in the Core or is it specific to a feature kit?"
 - Avoid **Leaky Abstractions**: Do not expose implementation details of third-party libraries in the core interfaces unless absolutely necessary.
 - Prioritize `interface` over `open class` to promote flexibility.
-- Maintain the "Consumer-Driven" pattern used in the project structure (validating core changes via the `showcase` app).
+- Maintain the "Consumer-Driven" pattern used in the project structure (validating core changes via the `:showcase` app).
