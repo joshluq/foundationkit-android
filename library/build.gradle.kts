@@ -46,7 +46,7 @@ androidPublishing {
     repoUrl = "${providers.gradleProperty("repositoryUrl").get()}/${providers.gradleProperty("artifactId").get()}-android"
     repoUser = System.getenv("GITHUB_ACTOR")
     repoPassword = System.getenv("GITHUB_TOKEN")
-    version = "${project.version}${project.findProperty("versionType")}"
+    version = "${project.version}${project.findProperty("versionType") ?: ""}"
     groupId = project.group.toString()
     artifactId = providers.gradleProperty("artifactId").get()
 }
