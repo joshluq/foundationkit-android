@@ -21,4 +21,5 @@ configure<ApplicationExtension> {
 
 dependencies {
     implementation(project(":foundationkit"))
+    testImplementation(project(":foundationkit-testing"))
 }
