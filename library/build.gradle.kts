@@ -1,6 +1,4 @@
 import com.android.build.api.dsl.LibraryExtension
-import io.gitlab.arturbosch.detekt.Detekt
-import org.gradle.api.publish.tasks.GenerateModuleMetadata
 
 plugins {
     alias(libs.plugins.pluginkit.android.library)

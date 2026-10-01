@@ -12,3 +12,8 @@ plugins {
     alias(libs.plugins.pluginkit.android.testing) apply false
     alias(libs.plugins.pluginkit.android.publishing) apply false
 }
+
+allprojects {
+    group = providers.gradleProperty("groupId").get()
+    version = "${providers.gradleProperty("libraryVersion").get()}${project.findProperty("versionType") ?: ""}"
+}
