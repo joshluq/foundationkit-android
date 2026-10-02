@@ -10,21 +10,21 @@ import es.joshluq.foundationkit.manager.toSafeContext
  *
  * @param context The Android context used to query display metrics and resources.
  */
-class AndroidDeviceInfoProvider(context: Context) : DeviceInfoProvider {
-
+class AndroidDeviceInfoProvider(
+    context: Context,
+) : DeviceInfoProvider {
     private val safeContext: Context = context.toSafeContext()
 
-    override fun getDeviceInfo(): DeviceInfo {
-        return DeviceInfo(
+    override fun getDeviceInfo(): DeviceInfo =
+        DeviceInfo(
             manufacturer = Build.MANUFACTURER.orEmpty(),
             model = Build.MODEL.orEmpty(),
             device = Build.DEVICE.orEmpty(),
             osVersion = Build.VERSION.RELEASE.orEmpty(),
             sdkInt = Build.VERSION.SDK_INT,
             isTablet = checkIsTablet(),
-            isEmulator = checkIsEmulator()
+            isEmulator = checkIsEmulator(),
         )
-    }
 
     private fun checkIsTablet(): Boolean {
         val screenLayout = safeContext.resources.configuration.screenLayout
@@ -43,19 +43,19 @@ class AndroidDeviceInfoProvider(context: Context) : DeviceInfoProvider {
         val hardware = Build.HARDWARE.orEmpty().lowercase()
 
         return fingerprint.startsWith("generic") ||
-                fingerprint.startsWith("unknown") ||
-                model.contains("google_sdk") ||
-                model.contains("emulator") ||
-                model.contains("android sdk built for x86") ||
-                manufacturer.contains("genymotion") ||
-                brand.startsWith("generic") && device.startsWith("generic") ||
-                product.contains("sdk") ||
-                product.contains("google_sdk") ||
-                product.contains("sdk_gphone") ||
-                product.contains("vbox86p") ||
-                product.contains("emulator") ||
-                product.contains("simulator") ||
-                hardware.contains("goldfish") ||
-                hardware.contains("ranchu")
+            fingerprint.startsWith("unknown") ||
+            model.contains("google_sdk") ||
+            model.contains("emulator") ||
+            model.contains("android sdk built for x86") ||
+            manufacturer.contains("genymotion") ||
+            (brand.startsWith("generic") && device.startsWith("generic")) ||
+            product.contains("sdk") ||
+            product.contains("google_sdk") ||
+            product.contains("sdk_gphone") ||
+            product.contains("vbox86p") ||
+            product.contains("emulator") ||
+            product.contains("simulator") ||
+            hardware.contains("goldfish") ||
+            hardware.contains("ranchu")
     }
 }

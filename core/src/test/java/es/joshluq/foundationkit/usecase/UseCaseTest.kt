@@ -8,36 +8,50 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UseCaseTest {
+    private data class TestInput(
+        val value: String,
+    ) : UseCaseInput
 
-    private data class TestInput(val value: String) : UseCaseInput
-    private data class TestOutput(val result: String) : UseCaseOutput
-
-    @Test
-    fun `UseCase should return success result`() = runTest {
-        val useCase = object : UseCase<TestInput, TestOutput> {
-            override suspend fun invoke(input: TestInput): Result<TestOutput> {
-                return Result.success(TestOutput("Processed ${input.value}"))
-            }
-        }
-
-        val result = useCase(TestInput("test"))
-        
-        assertTrue(result.isSuccess)
-        assertEquals("Processed test", result.getOrNull()?.result)
-    }
+    private data class TestOutput(
+        val result: String,
+    ) : UseCaseOutput
 
     @Test
-    fun `FlowUseCase should emit results`() = runTest {
-        val useCase = object : FlowUseCase<TestInput, TestOutput> {
-            override fun invoke(input: TestInput) = flowOf(
-                TestOutput("Emitted ${input.value}")
+    fun `UseCase should return success result`() =
+        runTest {
+            val useCase =
+                object : UseCase<TestInput, TestOutput> {
+                    override suspend fun invoke(input: TestInput): Result<TestOutput> =
+                        Result.success(
+                            TestOutput("Processed ${input.value}"),
+                        )
+                }
+
+            val result =
+                useCase(
+                    TestInput("test"),
+                )
+
+            assertTrue(result.isSuccess)
+            assertEquals(
+                "Processed test",
+                result.getOrNull()?.result,
             )
-
-
         }
 
-        val result = useCase(TestInput("test")).first()
+    @Test
+    fun `FlowUseCase should emit results`() =
+        runTest {
+            val useCase =
+                object : FlowUseCase<TestInput, TestOutput> {
+                    override fun invoke(input: TestInput) =
+                        flowOf(
+                            TestOutput("Emitted ${input.value}"),
+                        )
+                }
 
-        assertEquals("Emitted test", result.result)
-    }
+            val result = useCase(TestInput("test")).first()
+
+            assertEquals("Emitted test", result.result)
+        }
 }

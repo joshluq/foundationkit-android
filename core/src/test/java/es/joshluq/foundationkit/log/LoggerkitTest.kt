@@ -14,7 +14,7 @@ internal class LoggerKitTest {
 
         val tag = "TestTag"
         val message = "Test Message"
-        
+
         logger.d(tag, message)
 
         assertEquals(LogLevel.DEBUG, mockProvider.lastPriority)
@@ -31,19 +31,19 @@ internal class LoggerKitTest {
 
         logger.v("T", "M")
         assertEquals(LogLevel.VERBOSE, mockProvider.lastPriority)
-        
+
         logger.d("T", "M")
         assertEquals(LogLevel.DEBUG, mockProvider.lastPriority)
-        
+
         logger.i("T", "M")
         assertEquals(LogLevel.INFO, mockProvider.lastPriority)
-        
+
         logger.w("T", "M")
         assertEquals(LogLevel.WARN, mockProvider.lastPriority)
-        
+
         logger.e("T", "M")
         assertEquals(LogLevel.ERROR, mockProvider.lastPriority)
-        
+
         logger.wtf("T", "M")
         assertEquals(LogLevel.ASSERT, mockProvider.lastPriority)
     }

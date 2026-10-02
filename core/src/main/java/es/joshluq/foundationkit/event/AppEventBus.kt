@@ -28,5 +28,4 @@ interface AppEventBus {
 /**
  * Subscribes exclusively to events matching the specified type [T].
  */
-inline fun <reified T : AppEvent> AppEventBus.subscribe(): Flow<T> =
-    events.filterIsInstance<T>()
+inline fun <reified T : AppEvent> AppEventBus.subscribe(): Flow<T> = events.filterIsInstance<T>()

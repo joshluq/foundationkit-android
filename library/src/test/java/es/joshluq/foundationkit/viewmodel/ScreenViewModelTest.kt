@@ -14,7 +14,6 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScreenViewModelTest {
-
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
@@ -28,13 +27,22 @@ class ScreenViewModelTest {
     }
 
     // Concrete implementation for testing
-    private data class TestState(val count: Int = 0) : UiState
+    private data class TestState(
+        val count: Int = 0,
+    ) : UiState
+
     private sealed interface TestEvent : UiEvent {
         data object Increment : TestEvent
-        data class TriggerEffect(val message: String) : TestEvent
+
+        data class TriggerEffect(
+            val message: String,
+        ) : TestEvent
     }
+
     private sealed interface TestEffect : UiEffect {
-        data class ShowMessage(val message: String) : TestEffect
+        data class ShowMessage(
+            val message: String,
+        ) : TestEffect
     }
 
     private class TestViewModel : ScreenViewModel<TestState, TestEvent, TestEffect>() {
@@ -62,16 +70,17 @@ class ScreenViewModelTest {
     }
 
     @Test
-    fun `launchEffect should emit effect`() = runTest {
-        val viewModel = TestViewModel()
-        val expectedMessage = "Hello Test"
-        
-        viewModel.sendEvent(TestEvent.TriggerEffect(expectedMessage))
-        
-        val effect = viewModel.effects.first()
-        assertTrue(effect is TestEffect.ShowMessage)
-        assertEquals(expectedMessage, (effect as TestEffect.ShowMessage).message)
-    }
+    fun `launchEffect should emit effect`() =
+        runTest {
+            val viewModel = TestViewModel()
+            val expectedMessage = "Hello Test"
+
+            viewModel.sendEvent(TestEvent.TriggerEffect(expectedMessage))
+
+            val effect = viewModel.effects.first()
+            assertTrue(effect is TestEffect.ShowMessage)
+            assertEquals(expectedMessage, (effect as TestEffect.ShowMessage).message)
+        }
 }
 
 // Extension for convenience if assertTrue is not imported correctly by the env

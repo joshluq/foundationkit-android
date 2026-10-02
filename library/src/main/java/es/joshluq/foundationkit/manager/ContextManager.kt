@@ -31,7 +31,6 @@ fun Context.toSafeContext(): Context = this.applicationContext
  * @param B The type of the configuration builder.
  */
 interface ContextManagerFactory<M : Manager<C>, C : ManagerConfig, B : ContextConfigBuilder<C>> {
-
     /**
      * The internal builder used to create the manager instance from a configuration.
      */
@@ -52,7 +51,10 @@ interface ContextManagerFactory<M : Manager<C>, C : ManagerConfig, B : ContextCo
      * @param block The configuration DSL block.
      * @return A fully configured [Manager] instance.
      */
-    fun build(context: Context, block: B.() -> Unit): M {
+    fun build(
+        context: Context,
+        block: B.() -> Unit,
+    ): M {
         val dslBuilder = createBuilder(context.toSafeContext())
         dslBuilder.block()
         val config = dslBuilder.build()

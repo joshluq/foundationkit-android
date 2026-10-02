@@ -18,7 +18,7 @@ object LoggerDefaults {
         minLogLevel: LogLevel = LogLevel.VERBOSE,
         tagPrefix: String = "LoggerKit",
         showThread: Boolean = true,
-        useEmojis: Boolean = true
+        useEmojis: Boolean = true,
     ): LogProvider = AndroidLogProvider(minLogLevel, tagPrefix, showThread, useEmojis)
 }
 
@@ -29,26 +29,52 @@ private class AndroidLogProvider(
     override val minLogLevel: LogLevel,
     private val tagPrefix: String,
     private val showThread: Boolean,
-    private val useEmojis: Boolean
+    private val useEmojis: Boolean,
 ) : LogProvider {
-    override fun log(priority: LogLevel, tag: String, message: String, throwable: Throwable?) {
+    override fun log(
+        priority: LogLevel,
+        tag: String,
+        message: String,
+        throwable: Throwable?,
+    ) {
         if (priority.priority < minLogLevel.priority) return
 
         val decoratedTag = if (tagPrefix.isNotEmpty()) "$tagPrefix [$tag]" else tag
         val decoratedMessage = decorateMessage(priority, message)
 
         when (priority) {
-            LogLevel.VERBOSE -> Log.v(decoratedTag, decoratedMessage, throwable)
-            LogLevel.DEBUG -> Log.d(decoratedTag, decoratedMessage, throwable)
-            LogLevel.INFO -> Log.i(decoratedTag, decoratedMessage, throwable)
-            LogLevel.WARN -> Log.w(decoratedTag, decoratedMessage, throwable)
-            LogLevel.ERROR -> Log.e(decoratedTag, decoratedMessage, throwable)
-            LogLevel.ASSERT -> Log.wtf(decoratedTag, decoratedMessage, throwable)
+            LogLevel.VERBOSE -> {
+                Log.v(decoratedTag, decoratedMessage, throwable)
+            }
+
+            LogLevel.DEBUG -> {
+                Log.d(decoratedTag, decoratedMessage, throwable)
+            }
+
+            LogLevel.INFO -> {
+                Log.i(decoratedTag, decoratedMessage, throwable)
+            }
+
+            LogLevel.WARN -> {
+                Log.w(decoratedTag, decoratedMessage, throwable)
+            }
+
+            LogLevel.ERROR -> {
+                Log.e(decoratedTag, decoratedMessage, throwable)
+            }
+
+            LogLevel.ASSERT -> {
+                Log.wtf(decoratedTag, decoratedMessage, throwable)
+            }
+
             LogLevel.NONE -> { /* No-op */ }
         }
     }
 
-    private fun decorateMessage(priority: LogLevel, message: String): String {
+    private fun decorateMessage(
+        priority: LogLevel,
+        message: String,
+    ): String {
         val threadInfo = if (showThread) "[${Thread.currentThread().name}] " else ""
         val emoji = if (useEmojis) "${priority.emoji} " else ""
         return "$emoji$threadInfo$message"

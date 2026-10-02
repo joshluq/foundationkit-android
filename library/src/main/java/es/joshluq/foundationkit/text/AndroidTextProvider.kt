@@ -10,9 +10,12 @@ import androidx.compose.ui.res.stringResource
  * @param context The Android context used to resolve resources.
  * @return The resolved string.
  */
-fun TextProvider.asString(context: Context): String {
-    return when (this) {
-        is TextProvider.Dynamic -> value
+fun TextProvider.asString(context: Context): String =
+    when (this) {
+        is TextProvider.Dynamic -> {
+            value
+        }
+
         is TextProvider.Resource -> {
             // Optimization to avoid array copy for the common case of no format arguments.
             if (args.isEmpty()) {
@@ -24,9 +27,11 @@ fun TextProvider.asString(context: Context): String {
                 context.getString(resId, *args)
             }
         }
-        is TextProvider.Empty -> ""
+
+        is TextProvider.Empty -> {
+            ""
+        }
     }
-}
 
 /**
  * Resolves the [TextProvider] into a [String] within a Composable function.
@@ -34,9 +39,12 @@ fun TextProvider.asString(context: Context): String {
  * @return The resolved string.
  */
 @Composable
-fun TextProvider.asString(): String {
-    return when (this) {
-        is TextProvider.Dynamic -> value
+fun TextProvider.asString(): String =
+    when (this) {
+        is TextProvider.Dynamic -> {
+            value
+        }
+
         is TextProvider.Resource -> {
             // Optimization to avoid array copy for the common case of no format arguments.
             if (args.isEmpty()) {
@@ -48,6 +56,8 @@ fun TextProvider.asString(): String {
                 stringResource(resId, *args)
             }
         }
-        is TextProvider.Empty -> ""
+
+        is TextProvider.Empty -> {
+            ""
+        }
     }
-}

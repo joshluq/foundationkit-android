@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.TestDispatcher
  * @property testDispatcher The test dispatcher used for coroutines (defaults to [StandardTestDispatcher]).
  */
 class TestDispatcherProvider(
-    val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    val testDispatcher: TestDispatcher = StandardTestDispatcher(),
 ) : DispatcherProvider {
     override val main: CoroutineDispatcher = testDispatcher
     override val io: CoroutineDispatcher = testDispatcher

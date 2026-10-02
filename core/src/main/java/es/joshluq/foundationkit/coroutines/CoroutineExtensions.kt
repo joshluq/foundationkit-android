@@ -26,12 +26,14 @@ fun CoroutineScope.launchSafe(
     context: CoroutineContext = EmptyCoroutineContext,
     logger: LoggerKit? = null,
     onError: ((Throwable) -> Unit)? = null,
-    block: suspend CoroutineScope.() -> Unit
-): Job {
-    return launch(context) {
+    block: suspend CoroutineScope.() -> Unit,
+): Job =
+    launch(context) {
         try {
             block()
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        } catch (
+            @Suppress("TooGenericExceptionCaught") e: Exception,
+        ) {
             // CancellationException should not be swallowed to allow coroutine cancellation to work properly.
             if (e is CancellationException) throw e
 
@@ -41,7 +43,6 @@ fun CoroutineScope.launchSafe(
             onError?.invoke(e)
         }
     }
-}
 
 /**
  * Executes a suspendable block of code safely, returning a [Result].
@@ -55,11 +56,13 @@ fun CoroutineScope.launchSafe(
  */
 suspend fun <T> safeRun(
     logger: LoggerKit? = null,
-    block: suspend () -> T
-): Result<T> {
-    return try {
+    block: suspend () -> T,
+): Result<T> =
+    try {
         Result.success(block())
-    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+    } catch (
+        @Suppress("TooGenericExceptionCaught") e: Exception,
+    ) {
         // CancellationException should not be swallowed to allow coroutine cancellation to work properly.
         if (e is CancellationException) throw e
 
@@ -69,4 +72,3 @@ suspend fun <T> safeRun(
 
         Result.failure(e)
     }
-}

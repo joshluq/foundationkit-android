@@ -18,5 +18,5 @@ data class DeviceInfo(
     val osVersion: String,
     val sdkInt: Int,
     val isTablet: Boolean,
-    val isEmulator: Boolean
+    val isEmulator: Boolean,
 )

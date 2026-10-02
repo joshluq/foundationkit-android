@@ -4,13 +4,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class TextProviderTest {
-
     @Test
     fun `asString with Dynamic returns correct value`() {
         val expectedValue = "Hello World"
         val textProvider = TextProvider.Dynamic(expectedValue)
-        
-        // Note: asString(context) and asString() @Composable can't be tested in simple unit tests 
+
+        // Note: asString(context) and asString() @Composable can't be tested in simple unit tests
         // without mocking Android or using Compose Test Rules.
         // But we can verify the data class structure.
         assertEquals(expectedValue, textProvider.value)
