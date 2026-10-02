@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -46,3 +46,22 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew test publish -PversionType=""
+
+      - name: Extract Library Version
+        id: extract_version
+        run: |
+          VERSION=$(grep '^libraryVersion=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Git Tag & GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.extract_version.outputs.TAG }}
+          name: Release ${{ steps.extract_version.outputs.VERSION }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
