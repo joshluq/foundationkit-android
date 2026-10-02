@@ -15,14 +15,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 class DefaultAppEventBus(
     replay: Int = 0,
     extraBufferCapacity: Int = 64,
-    onBufferOverflow: BufferOverflow = BufferOverflow.DROP_OLDEST
+    onBufferOverflow: BufferOverflow = BufferOverflow.DROP_OLDEST,
 ) : AppEventBus {
-
-    private val _events = MutableSharedFlow<AppEvent>(
-        replay = replay,
-        extraBufferCapacity = extraBufferCapacity,
-        onBufferOverflow = onBufferOverflow
-    )
+    private val _events =
+        MutableSharedFlow<AppEvent>(
+            replay = replay,
+            extraBufferCapacity = extraBufferCapacity,
+            onBufferOverflow = onBufferOverflow,
+        )
 
     override val events: Flow<AppEvent> = _events.asSharedFlow()
 
@@ -30,7 +30,5 @@ class DefaultAppEventBus(
         _events.emit(event)
     }
 
-    override fun tryPublish(event: AppEvent): Boolean {
-        return _events.tryEmit(event)
-    }
+    override fun tryPublish(event: AppEvent): Boolean = _events.tryEmit(event)
 }

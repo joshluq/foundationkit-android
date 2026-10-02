@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AppErrorTest {
-
     @Test
     fun `toTextProvider produces correct messages for each AppError subtype`() {
         val noInternet = AppError.NoInternet()

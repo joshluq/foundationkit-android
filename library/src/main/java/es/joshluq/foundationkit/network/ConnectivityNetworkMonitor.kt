@@ -19,62 +19,71 @@ import kotlinx.coroutines.flow.map
  * @param context The Android context (automatically converted to application context).
  */
 class ConnectivityNetworkMonitor(
-    context: Context
+    context: Context,
 ) : NetworkMonitor {
-
     private val safeContext = context.toSafeContext()
     private val connectivityManager =
         safeContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
 
-    override val status: Flow<NetworkStatus> = callbackFlow {
-        if (connectivityManager == null) {
-            trySend(NetworkStatus.Unavailable)
-            close()
-            return@callbackFlow
-        }
-
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                trySend(NetworkStatus.Available)
-            }
-
-            override fun onLosing(network: Network, maxMsToLive: Int) {
-                trySend(NetworkStatus.Losing)
-            }
-
-            override fun onLost(network: Network) {
-                trySend(NetworkStatus.Lost)
-            }
-
-            override fun onUnavailable() {
+    override val status: Flow<NetworkStatus> =
+        callbackFlow {
+            if (connectivityManager == null) {
                 trySend(NetworkStatus.Unavailable)
+                close()
+                return@callbackFlow
             }
-        }
 
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
+            val callback =
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        trySend(NetworkStatus.Available)
+                    }
 
-        connectivityManager.registerNetworkCallback(request, callback)
+                    override fun onLosing(
+                        network: Network,
+                        maxMsToLive: Int,
+                    ) {
+                        trySend(NetworkStatus.Losing)
+                    }
 
-        // Emit current initial connectivity status
-        val currentNetwork = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(currentNetwork)
-        val hasInternet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-        trySend(if (hasInternet) NetworkStatus.Available else NetworkStatus.Unavailable)
+                    override fun onLost(network: Network) {
+                        trySend(NetworkStatus.Lost)
+                    }
 
-        awaitClose {
-            try {
-                connectivityManager.unregisterNetworkCallback(callback)
-            } catch (@Suppress("TooGenericExceptionCaught") _: Exception) {
-                // Ignore unregister exceptions if already unregistered
+                    override fun onUnavailable() {
+                        trySend(NetworkStatus.Unavailable)
+                    }
+                }
+
+            val request =
+                NetworkRequest
+                    .Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .build()
+
+            connectivityManager.registerNetworkCallback(request, callback)
+
+            // Emit current initial connectivity status
+            val currentNetwork = connectivityManager.activeNetwork
+            val capabilities = connectivityManager.getNetworkCapabilities(currentNetwork)
+            val hasInternet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+            trySend(if (hasInternet) NetworkStatus.Available else NetworkStatus.Unavailable)
+
+            awaitClose {
+                try {
+                    connectivityManager.unregisterNetworkCallback(callback)
+                } catch (
+                    @Suppress("TooGenericExceptionCaught") _: Exception,
+                ) {
+                    // Ignore unregister exceptions if already unregistered
+                }
             }
-        }
-    }.distinctUntilChanged().conflate()
+        }.distinctUntilChanged().conflate()
 
-    override val isOnline: Flow<Boolean> = status
-        .map { it == NetworkStatus.Available }
-        .distinctUntilChanged()
+    override val isOnline: Flow<Boolean> =
+        status
+            .map { it == NetworkStatus.Available }
+            .distinctUntilChanged()
 }
 
 /**

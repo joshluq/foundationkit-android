@@ -15,19 +15,20 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AndroidPlatformInfoProvidersTest {
-
     @Test
     fun `AndroidAppInfoProvider extracts package metadata correctly`() {
         val context = mockk<Context>()
         val packageManager = mockk<PackageManager>()
-        val appInfo = ApplicationInfo().apply {
-            flags = ApplicationInfo.FLAG_DEBUGGABLE
-            targetSdkVersion = 34
-        }
-        val packageInfo = PackageInfo().apply {
-            versionName = "2.1.0"
-            applicationInfo = appInfo
-        }
+        val appInfo =
+            ApplicationInfo().apply {
+                flags = ApplicationInfo.FLAG_DEBUGGABLE
+                targetSdkVersion = 34
+            }
+        val packageInfo =
+            PackageInfo().apply {
+                versionName = "2.1.0"
+                applicationInfo = appInfo
+            }
 
         every { context.applicationContext } returns context
         every { context.packageName } returns "es.joshluq.test"
@@ -53,10 +54,11 @@ class AndroidPlatformInfoProvidersTest {
     fun `AndroidDeviceInfoProvider returns valid device metadata`() {
         val context = mockk<Context>()
         val resources = mockk<Resources>()
-        val configuration = Configuration().apply {
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
-            smallestScreenWidthDp = 360
-        }
+        val configuration =
+            Configuration().apply {
+                screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
+                smallestScreenWidthDp = 360
+            }
 
         every { context.applicationContext } returns context
         every { context.resources } returns resources

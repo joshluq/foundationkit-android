@@ -16,5 +16,5 @@ data class AppInfo(
     val versionCode: Long,
     val isDebuggable: Boolean,
     val minSdk: Int? = null,
-    val targetSdk: Int? = null
+    val targetSdk: Int? = null,
 )

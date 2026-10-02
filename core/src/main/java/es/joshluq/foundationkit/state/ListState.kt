@@ -9,7 +9,6 @@ import es.joshluq.foundationkit.text.TextProvider
  * @param T The type of the elements in the list.
  */
 sealed interface ListState<out T> {
-
     /**
      * The initial state, before any action has been taken.
      * Use this when the screen is first loaded and no data request has been made yet.
@@ -28,7 +27,9 @@ sealed interface ListState<out T> {
      *
      * @property data The list of items retrieved.
      */
-    data class Success<out T>(val data: List<T>) : ListState<T>
+    data class Success<out T>(
+        val data: List<T>,
+    ) : ListState<T>
 
     /**
      * Represents a successful fetch of data, but the result is empty.
@@ -42,7 +43,9 @@ sealed interface ListState<out T> {
      *
      * @property message The error message to be displayed.
      */
-    data class Error(val message: TextProvider) : ListState<Nothing>
+    data class Error(
+        val message: TextProvider,
+    ) : ListState<Nothing>
 }
 
 /**
@@ -66,9 +69,7 @@ fun <T> ListState<T>.getOrNull(): List<T>? = (this as? ListState.Success)?.data
  * Converts a [List] to a [ListState].
  * Returns [ListState.Empty] if the list is empty, otherwise [ListState.Success].
  */
-fun <T> List<T>.toSuccessOrEmpty(): ListState<T> {
-    return if (this.isEmpty()) ListState.Empty else ListState.Success(this)
-}
+fun <T> List<T>.toSuccessOrEmpty(): ListState<T> = if (this.isEmpty()) ListState.Empty else ListState.Success(this)
 
 /**
  * Converts a Kotlin [Result] containing a [List] to a [ListState].
@@ -79,10 +80,9 @@ fun <T> List<T>.toSuccessOrEmpty(): ListState<T> {
 fun <T> Result<List<T>>.toListState(
     errorMapper: (Throwable) -> TextProvider = {
         TextProvider.Dynamic(it.message ?: "Unknown error")
-    }
-): ListState<T> {
-    return fold(
+    },
+): ListState<T> =
+    fold(
         onSuccess = { it.toSuccessOrEmpty() },
-        onFailure = { ListState.Error(errorMapper(it)) }
+        onFailure = { ListState.Error(errorMapper(it)) },
     )
-}

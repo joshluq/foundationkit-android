@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
  * and specific status transitions (available, losing, lost, unavailable).
  */
 interface NetworkMonitor {
-
     /**
      * A cold [Flow] emitting `true` whenever an active network with internet capability is available,
      * and `false` otherwise.

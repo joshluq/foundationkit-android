@@ -23,21 +23,22 @@ dependencies {
 pluginkitQuality {
     sonarHost = "https://sonarcloud.io"
     sonarProjectKey = "joshluq_foundationkit-android"
-    koverExclusions = listOf(
-        "**.showcase.*",
-        "**.di.*",
-        "**.*_di_*",
-        "**.BuildConfig",
-        "**.R",
-        "**.R$*",
-        "**.Dagger*",
-        "**.*_Factory",
-        "**.*_Factory*",
-        "**.*_MembersInjector",
-        "**.*_HiltModules*",
-        "**.Hilt_*",
-        "**.*_Provide*Factory*"
-    )
+    koverExclusions =
+        listOf(
+            "**.showcase.*",
+            "**.di.*",
+            "**.*_di_*",
+            "**.BuildConfig",
+            "**.R",
+            "**.R$*",
+            "**.Dagger*",
+            "**.*_Factory",
+            "**.*_Factory*",
+            "**.*_MembersInjector",
+            "**.*_HiltModules*",
+            "**.Hilt_*",
+            "**.*_Provide*Factory*",
+        )
 }
 
 androidPublishing {

@@ -10,16 +10,16 @@ import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class ConnectivityNetworkMonitorTest {
-
     @Test
-    fun `when connectivityManager is null, status is Unavailable and isOnline is false`() = runTest {
-        val context = mockk<Context>()
-        every { context.applicationContext } returns context
-        every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns null
+    fun `when connectivityManager is null, status is Unavailable and isOnline is false`() =
+        runTest {
+            val context = mockk<Context>()
+            every { context.applicationContext } returns context
+            every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns null
 
-        val monitor = ConnectivityNetworkMonitor(context)
+            val monitor = ConnectivityNetworkMonitor(context)
 
-        assertEquals(NetworkStatus.Unavailable, monitor.status.first())
-        assertFalse(monitor.isOnline.first())
-    }
+            assertEquals(NetworkStatus.Unavailable, monitor.status.first())
+            assertFalse(monitor.isOnline.first())
+        }
 }

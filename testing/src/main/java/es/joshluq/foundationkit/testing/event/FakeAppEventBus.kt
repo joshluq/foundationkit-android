@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asSharedFlow
  * Captures all published events in [publishedEvents] for assertions.
  */
 class FakeAppEventBus : AppEventBus {
-
     private val _events = MutableSharedFlow<AppEvent>(extraBufferCapacity = 64)
     override val events: Flow<AppEvent> = _events.asSharedFlow()
 
@@ -39,12 +38,10 @@ class FakeAppEventBus : AppEventBus {
     /**
      * Finds the first event of type [T], or null if none was published.
      */
-    inline fun <reified T : AppEvent> findEvent(): T? =
-        publishedEvents.filterIsInstance<T>().firstOrNull()
+    inline fun <reified T : AppEvent> findEvent(): T? = publishedEvents.filterIsInstance<T>().firstOrNull()
 
     /**
      * Filters all published events of type [T].
      */
-    inline fun <reified T : AppEvent> filterEvents(): List<T> =
-        publishedEvents.filterIsInstance<T>()
+    inline fun <reified T : AppEvent> filterEvents(): List<T> = publishedEvents.filterIsInstance<T>()
 }

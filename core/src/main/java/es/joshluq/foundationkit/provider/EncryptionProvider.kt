@@ -5,7 +5,6 @@ package es.joshluq.foundationkit.provider
  * decryption services.
  */
 interface EncryptionProvider : Provider {
-
     /**
      * Encrypts the given data.
      *

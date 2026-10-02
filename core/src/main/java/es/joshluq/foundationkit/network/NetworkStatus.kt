@@ -14,5 +14,5 @@ enum class NetworkStatus {
     Losing,
 
     /** Network connection was previously available and has now been lost. */
-    Lost
+    Lost,
 }
