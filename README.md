@@ -85,6 +85,13 @@ class MyViewModelTest {
 }
 ```
 
+#### Included Test Fixtures:
+* `MainDispatcherRule`: JUnit Rule for automatically setting and restoring `Dispatchers.Main`.
+* `TestDispatcherProvider`: `DispatcherProvider` implementation backed by test dispatchers.
+* `FakeAppEventBus`: Record and inspect events published during unit tests.
+* `FakeAppInfoProvider`: Provide deterministic application metadata without Android `PackageManager`.
+* `FakeDeviceInfoProvider`: Provide deterministic device metadata without Android `Build` properties.
+
 ---
 
 ### 3. ⏱️ Flow Operators (`throttleFirst`)
@@ -126,7 +133,53 @@ val listState: ListState.Error = error.toListStateError()
 
 ---
 
-### 5. 🏗️ DSL Initialization Pattern
+### 5. 📱 Device & Application Metadata (`AppInfoProvider` & `DeviceInfoProvider`)
+Decoupled providers to query application and device attributes without leaking Android framework details into business layers.
+
+```kotlin
+// Obtain providers from any Android Context
+val appInfoProvider: AppInfoProvider = context.appInfoProvider()
+val deviceInfoProvider: DeviceInfoProvider = context.deviceInfoProvider()
+
+// Query immutable metadata
+val appInfo: AppInfo = appInfoProvider.getAppInfo()
+println("App: ${appInfo.packageName} v${appInfo.versionName} (build ${appInfo.versionCode}), debuggable=${appInfo.isDebuggable}")
+
+val deviceInfo: DeviceInfo = deviceInfoProvider.getDeviceInfo()
+println("Device: ${deviceInfo.manufacturer} ${deviceInfo.model}, OS: Android ${deviceInfo.osVersion} (SDK ${deviceInfo.sdkInt}), tablet=${deviceInfo.isTablet}")
+```
+
+---
+
+### 6. 📡 Lightweight, Type-Safe Event Bus (`AppEventBus`)
+Coroutines-powered reactive event bus for cross-cutting communication across modules without third-party reflection libraries.
+
+```kotlin
+import es.joshluq.foundationkit.event.AppEvent
+import es.joshluq.foundationkit.event.DefaultAppEventBus
+import es.joshluq.foundationkit.event.subscribe
+
+// 1. Define typed domain events
+data class SessionExpiredEvent(val reason: String) : AppEvent
+
+// 2. Instantiate or inject bus (powered by MutableSharedFlow)
+val eventBus: AppEventBus = DefaultAppEventBus()
+
+// 3. Publish events (suspending or non-suspending)
+eventBus.publish(SessionExpiredEvent("Token invalidated"))
+eventBus.tryPublish(SessionExpiredEvent("Quick notification"))
+
+// 4. Subscribe strictly to specific event types
+lifecycleScope.launch {
+    eventBus.subscribe<SessionExpiredEvent>().collect { event ->
+        navigateToLogin(event.reason)
+    }
+}
+```
+
+---
+
+### 7. 🏗️ DSL Initialization Pattern
 The official standard for creating configurable managers and SDK entry points.
 
 #### Flavor A: Context-Aware Manager (Android SDK)
@@ -146,7 +199,7 @@ val manager = PureManager.build {
 
 ---
 
-### 6. 🏛️ Clean Architecture & MVI Foundation
+### 8. 🏛️ Clean Architecture & MVI Foundation
 
 * **Use Cases**: Standardized `UseCase<I, O>` (one-shot `suspend`) and `FlowUseCase<I, O>` (reactive stream) with `UseCaseInput` and `UseCaseOutput`.
 * **ScreenViewModel**: Unidirectional Data Flow (UDF) managing `UiState` (immutable for Compose Strong Skipping), `UiEvent`, and one-off `UiEffect`.
@@ -168,7 +221,7 @@ class ProfileViewModel(
 
 ---
 
-### 7. 💬 Decoupled Text (`TextProvider`)
+### 9. 💬 Decoupled Text (`TextProvider`)
 Represent strings in ViewModels without leaking `android.content.Context`.
 
 ```kotlin
@@ -185,7 +238,7 @@ Text(text = title.asString())
 
 ---
 
-### 8. 📊 Exhaustive Data Collections (`ListState`)
+### 10. 📊 Exhaustive Data Collections (`ListState`)
 Represent the full lifecycle of data collections in UI.
 
 ```kotlin
@@ -202,7 +255,7 @@ when (state) {
 
 ---
 
-### 9. 💾 Storage Providers
+### 11. 💾 Storage Providers
 Abstracted key-value and object storage with serialization support:
 * `CacheStorageProvider`: In-memory thread-safe cache (`ConcurrentHashMap`).
 * `SharedPreferencesStorageProvider`: Android `SharedPreferences` with custom `SerializerProvider`.
