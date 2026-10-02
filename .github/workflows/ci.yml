@@ -37,10 +37,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Run Unit Tests
+      - name: Check Code Formatting (Spotless)
         run: |
           chmod +x gradlew
-          ./gradlew test
+          ./gradlew spotlessCheck
+
+      - name: Run Unit Tests
+        run: ./gradlew test
 
       - name: Verify Showcase App Build
         run: ./gradlew :showcase:assembleDebug
+
