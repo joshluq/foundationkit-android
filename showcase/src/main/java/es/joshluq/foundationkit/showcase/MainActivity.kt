@@ -38,6 +38,11 @@ import es.joshluq.foundationkit.viewmodel.ScreenViewModel
 import es.joshluq.foundationkit.viewmodel.UiEffect
 import es.joshluq.foundationkit.viewmodel.UiEvent
 import es.joshluq.foundationkit.viewmodel.UiState
+import es.joshluq.foundationkit.event.AppEvent
+import es.joshluq.foundationkit.event.DefaultAppEventBus
+import es.joshluq.foundationkit.event.subscribe
+import es.joshluq.foundationkit.platform.appInfoProvider
+import es.joshluq.foundationkit.platform.deviceInfoProvider
 import kotlinx.coroutines.launch
 
 // --- MVI Components for Showcase ---
@@ -111,6 +116,10 @@ class MainActivity : ComponentActivity() {
                         item { MviDemo(state = state, onEvent = viewModel::sendEvent) }
                         item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
                         item { UseCaseDemo() }
+                        item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+                        item { PlatformInfoDemo() }
+                        item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+                        item { EventBusDemo() }
                     }
                 }
             }
@@ -199,5 +208,67 @@ fun UseCaseDemo() {
         }
         
         Text(text = "Flow results: ${flowResults.joinToString(", ")}")
+    }
+}
+
+@Composable
+fun PlatformInfoDemo() {
+    val context = LocalContext.current
+    val appInfo = remember { context.appInfoProvider().getAppInfo() }
+    val deviceInfo = remember { context.deviceInfoProvider().getDeviceInfo() }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(text = "PlatformInfo Demo", style = MaterialTheme.typography.titleMedium)
+        Text(text = "App: ${appInfo.packageName} (${appInfo.versionName})", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Debuggable: ${appInfo.isDebuggable} | TargetSdk: ${appInfo.targetSdk}", style = MaterialTheme.typography.bodySmall)
+        Text(text = "Device: ${deviceInfo.manufacturer} ${deviceInfo.model} (API ${deviceInfo.sdkInt})", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Tablet: ${deviceInfo.isTablet} | Emulator: ${deviceInfo.isEmulator}", style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+// Sample event for showcase
+data class ShowcaseMessageEvent(val text: String, val timestamp: Long = System.currentTimeMillis()) : AppEvent
+
+@Composable
+fun EventBusDemo() {
+    val scope = rememberCoroutineScope()
+    val eventBus = remember { DefaultAppEventBus() }
+    val receivedMessages = remember { mutableStateListOf<String>() }
+
+    LaunchedEffect(eventBus) {
+        eventBus.subscribe<ShowcaseMessageEvent>().collect { event ->
+            receivedMessages.add(event.text)
+        }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(text = "AppEventBus Demo", style = MaterialTheme.typography.titleMedium)
+
+        Button(
+            onClick = {
+                scope.launch {
+                    val count = receivedMessages.size + 1
+                    eventBus.publish(ShowcaseMessageEvent("Event #$count triggered"))
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Publish ShowcaseMessageEvent")
+        }
+
+        if (receivedMessages.isNotEmpty()) {
+            Text(
+                text = "Received: ${receivedMessages.takeLast(3).joinToString(" | ")}",
+                style = MaterialTheme.typography.bodySmall
+            )
+        } else {
+            Text(text = "No events received yet", style = MaterialTheme.typography.bodySmall)
+        }
     }
 }

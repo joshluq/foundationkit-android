@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.pluginkit.jvm.library)
     alias(libs.plugins.pluginkit.jvm.publishing)
     alias(libs.plugins.pluginkit.quality)
+    alias(libs.plugins.pluginkit.formatting)
 }
 
 group = providers.gradleProperty("groupId").get()
@@ -18,18 +19,20 @@ jvmPublishing {
 }
 
 dependencies {
-    implementation(libs.bundles.testing.unit)
+    api(libs.kotlinx.coroutines.core)
+    testImplementation(libs.bundles.testing.unit)
 }
 
 pluginkitQuality {
     sonarHost = "https://sonarcloud.io"
     sonarProjectKey = "joshluq_foundationkit-core"
-    koverExclusions = listOf(
-        "**.showcase.*",
-        "**.di.*",
-        "**.*_di_*",
-        "**.BuildConfig",
-        "**.R",
-        "**.R$*"
-    )
+    koverExclusions =
+        listOf(
+            "**.showcase.*",
+            "**.di.*",
+            "**.*_di_*",
+            "**.BuildConfig",
+            "**.R",
+            "**.R$*",
+        )
 }

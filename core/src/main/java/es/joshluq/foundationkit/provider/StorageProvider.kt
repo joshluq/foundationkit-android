@@ -12,7 +12,11 @@ interface StorageProvider : Provider {
      * @param value The value to be saved.
      * @param type The class type of the value.
      */
-    suspend fun <T : Any> save(key: String, value: T, type: Class<T>)
+    suspend fun <T : Any> save(
+        key: String,
+        value: T,
+        type: Class<T>,
+    )
 
     /**
      * Reads the value associated with the specified key.
@@ -21,7 +25,10 @@ interface StorageProvider : Provider {
      * @param type The class type of the value.
      * @return The value associated with the key, or null if not found.
      */
-    suspend fun <T : Any> read(key: String, type: Class<T>): T?
+    suspend fun <T : Any> read(
+        key: String,
+        type: Class<T>,
+    ): T?
 
     /**
      * Deletes the value associated with the specified key.
@@ -42,7 +49,10 @@ interface StorageProvider : Provider {
  * @param key The key to associate the value with.
  * @param value The value to be saved.
  */
-suspend inline fun <reified T : Any> StorageProvider.save(key: String, value: T) {
+suspend inline fun <reified T : Any> StorageProvider.save(
+    key: String,
+    value: T,
+) {
     save(key, value, T::class.java)
 }
 
@@ -52,6 +62,4 @@ suspend inline fun <reified T : Any> StorageProvider.save(key: String, value: T)
  * @param key The key to read the value from.
  * @return The value associated with the key, or null if not found.
  */
-suspend inline fun <reified T : Any> StorageProvider.read(key: String): T? {
-    return read(key, T::class.java)
-}
+suspend inline fun <reified T : Any> StorageProvider.read(key: String): T? = read(key, T::class.java)

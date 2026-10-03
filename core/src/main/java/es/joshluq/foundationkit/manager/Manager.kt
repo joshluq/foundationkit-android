@@ -9,7 +9,6 @@ package es.joshluq.foundationkit.manager
  * @param T The type of configuration required by this manager.
  */
 abstract class Manager<T : ManagerConfig> {
-
     /**
      * The configuration for this manager.
      * It is marked as [Volatile] and `lateinit` to allow for asynchronous initialization.
@@ -30,7 +29,6 @@ abstract class Manager<T : ManagerConfig> {
  * @param M The type of the manager to be built.
  */
 interface ManagerBuilder<C : ManagerConfig, M : Manager<C>> {
-
     /**
      * Builds a new instance of [Manager] using the provided configuration.
      *
@@ -48,7 +46,6 @@ interface ManagerBuilder<C : ManagerConfig, M : Manager<C>> {
  * @param B The type of the configuration builder.
  */
 interface ManagerFactory<M : Manager<C>, C : ManagerConfig, B : ConfigBuilder<C>> {
-
     /**
      * The internal builder used to create the manager instance from a configuration.
      */

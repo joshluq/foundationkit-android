@@ -5,12 +5,21 @@ on:
     branches:
       - develop
     paths-ignore:
-      - 'README.md'
+      - '**.md'
+      - '.agents/**'
       - 'docs/**'
       - 'showcase/**'
+      - '.gitignore'
+      - 'LICENSE'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-snapshot-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   publish:
+    name: Test and Publish Snapshot
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
     permissions:
@@ -18,30 +27,22 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout del código
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configurar JDK 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Configurar Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-          bundler-cache: true
-
-      - name: Configurar Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Ejecutar Fastlane Publish Snapshot
+      - name: Test and Publish Snapshot to GitHub Packages
         env:
-          
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
-          
         run: |
           chmod +x gradlew
-          bundle exec fastlane publish_snapshot
+          ./gradlew test publish -PversionType="-SNAPSHOT"

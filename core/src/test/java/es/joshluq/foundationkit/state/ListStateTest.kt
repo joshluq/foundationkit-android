@@ -8,7 +8,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ListStateTest {
-
     @Test
     fun `isLoading returns true only for Loading state`() {
         assertTrue(ListState.Loading.isLoading)

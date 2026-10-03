@@ -5,7 +5,6 @@ package es.joshluq.foundationkit.provider
  * integration with third-party monitoring services (e.g., Firebase, Sentry).
  */
 interface MonitorProvider<E, M> : Provider {
-
     /**
      * Unique identifier for the provider.
      */
@@ -31,7 +30,10 @@ interface MonitorProvider<E, M> : Provider {
      * @param key The attribute key.
      * @param value The attribute value.
      */
-    fun setAttribute(key: String, value: String) {}
+    fun setAttribute(
+        key: String,
+        value: String,
+    ) {}
 
     /**
      * Sets multiple global attributes for this provider.
@@ -63,14 +65,20 @@ interface MonitorProvider<E, M> : Provider {
      * @param traceKey Unique name of the trace.
      * @param properties Initial properties.
      */
-    suspend fun startTrace(traceKey: String, properties: Map<String, Any>? = null) {}
+    suspend fun startTrace(
+        traceKey: String,
+        properties: Map<String, Any>? = null,
+    ) {}
 
     /**
      * Stops a native trace on the provider.
      * @param traceKey Unique name of the trace.
      * @param properties Final properties to attach.
      */
-    suspend fun stopTrace(traceKey: String, properties: Map<String, Any>? = null) {}
+    suspend fun stopTrace(
+        traceKey: String,
+        properties: Map<String, Any>? = null,
+    ) {}
 
     /**
      * Cancels a native trace on the provider.

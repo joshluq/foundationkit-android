@@ -1,0 +1,50 @@
+name: CI Pull Request Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+      - '.agents/**'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Check Code Formatting (Spotless)
+        run: |
+          chmod +x gradlew
+          ./gradlew spotlessCheck
+
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      - name: Verify Showcase App Build
+        run: ./gradlew :showcase:assembleDebug
+

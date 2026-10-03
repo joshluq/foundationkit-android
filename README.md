@@ -1,134 +1,272 @@
 # FoundationKit
 
-[![Kotlin Version](https://img.shields.io/badge/kotlin-1.9.0-blue.svg)](http://kotlinlang.org/)
-[![Platform](https://img.shields.io/badge/platform-android-green.svg)](https://developer.android.com/android)
+[![Platform](https://img.shields.io/badge/platform-android%20%7C%20jvm-green.svg)](https://developer.android.com/android)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.x-blue.svg)](http://kotlinlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**The fundamental pillar of the suite.** 
+**The foundational bedrock of the mobile ecosystem.**
 
-FoundationKit provides the base abstractions, common interfaces, and essential utilities that all modules in the compendium depend on, ensuring consistency and efficiency across the entire ecosystem. It is the "glue" and the "foundation" for kits like AuthKit, MetricKit, and others.
-
----
-
-## 🚀 Features
-
-- 🛠 **Core Abstractions**: Common interfaces for Clean Architecture (`UseCase`, `FlowUseCase`).
-- 🏗 **MVI Foundation**: Base classes for State-Event-Effect architecture (`ScreenViewModel`).
-- 🪵 **Loggerkit**: A flexible, decorator-based logging system.
-- 🧵 **Concurrency & Coroutines**: Injectable `DispatcherProvider`, `launchSafe`, and lifecycle-aware `ScopeOwner`.
-- 💬 **TextProvider**: Decoupled text management for ViewModels (Strings, Resources, Compose).
-- 📊 **ListState**: Exhaustive state management for data collections (Idle, Loading, Success, Empty, Error).
-- 🗺 **Mapping Utilities**: Generic `Mappable` and `Model` interfaces for data transformation.
-- 💾 **Storage & Persistence**: Flexible `StorageProvider` with `Cache` and `SharedPreferences` implementations.
-- 🏗 **Managers & Providers**: Base abstractions for decoupled service management and implementation.
-- 📱 **Showcase App**: Integrated demonstration of all components.
+FoundationKit provides base abstractions, common interfaces, and essential utilities that all feature modules (AuthKit, MetricKit, etc.) depend on, ensuring consistency, efficiency, and zero leaky abstractions across the suite.
 
 ---
 
-## 📦 Installation
+## 📦 Modules & Installation
 
-Add the dependency to your `build.gradle.kts`:
+FoundationKit is split into modules following strict purity boundaries:
 
 ```kotlin
 dependencies {
-    implementation("es.joshluq.kit:foundationkit:1.1.0")
+    // 1. Android Library: Context, SharedPreferences, ViewModel, NetworkMonitor, Resources
+    implementation("es.joshluq.kit:foundationkit:2.0.0")
+
+    // 2. Pure JVM / Kotlin Core (for pure Kotlin domain/data modules without Android SDK)
+    implementation("es.joshluq.kit:foundationkit-core:2.0.0")
+
+    // 3. Testing Fixtures (for unit test sourcesets across all kits and apps)
+    testImplementation("es.joshluq.kit:foundationkit-testing:2.0.0")
 }
 ```
 
 ---
 
-## 🛠 Components
+## 🚀 Key Features & Components
 
-### 1. Loggerkit
-A robust logging utility that follows Dependency Inversion.
-
-```kotlin
-val logger = Loggerkit.Builder().build()
-logger.i("Tag", "Hello FoundationKit!") 
-```
-
-### 2. Concurrency & Coroutines
-Infrastructure for testable and safe asynchronous tasks.
+### 1. 🌐 Network Connectivity Monitoring (`NetworkMonitor`)
+Observe device internet connectivity reactively with automatic cleanup.
 
 ```kotlin
-// Injectable Dispatchers
-class MyRepository @Inject constructor(private val dispatchers: DispatcherProvider) {
-    suspend fun doWork() = withContext(dispatchers.io) { ... }
+// Obtain monitor from any Android Context
+val networkMonitor: NetworkMonitor = context.networkMonitor()
+
+// 1. Simple boolean state
+lifecycleScope.launch {
+    networkMonitor.isOnline.collect { isOnline ->
+        if (isOnline) syncPendingData() else showOfflineBanner()
+    }
 }
 
-// Safe launching with automatic logging
-viewModelScope.launchSafe(logger = logger, onError = { /* Handle error */ }) {
-    // Suspend work
-}
-
-// Safe execution with Result
-val result = safeRun(logger) { api.call() }
-```
-
-### 3. TextProvider
-Handle strings in ViewModels without `Context` or `R.string`.
-
-```kotlin
-val text = TextProvider.Resource(R.string.welcome_message, "User")
-// Resolve in UI
-val string = text.asString(context) 
-// Resolve in Compose
-val string = text.asString() 
-```
-
-### 4. ListState
-Standardized state for collections.
-
-```kotlin
-val state: ListState<User> = users.toListState()
-when (state) {
-    is ListState.Loading -> ShowLoader()
-    is ListState.Success -> ShowList(state.data)
-    is ListState.Error -> ShowError(state.message.asString())
-    is ListState.Empty -> ShowEmpty()
+// 2. Granular status (Available, Losing, Lost, Unavailable)
+lifecycleScope.launch {
+    networkMonitor.status.collect { status ->
+        when (status) {
+            NetworkStatus.Available -> hideBanner()
+            NetworkStatus.Losing -> showWeakConnectionWarning()
+            NetworkStatus.Lost, NetworkStatus.Unavailable -> showOfflineBanner()
+        }
+    }
 }
 ```
 
-### 5. ScreenViewModel (MVI)
-Base class to implement Unidirectional Data Flow (UDF).
+> **Note:** The `:foundationkit` library automatically includes the `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />` manifest permission.
+
+---
+
+### 2. 🧪 Testing Utilities (`foundationkit-testing`)
+Avoid rewriting coroutine test boilerplate across every module.
 
 ```kotlin
-class MyViewModel : ScreenViewModel<MyState, MyEvent, MyEffect>() {
-    override fun createInitialState() = MyState()
-    override fun handleEvent(event: MyEvent) { ... }
+class MyViewModelTest {
+
+    // Automatically replaces Dispatchers.Main with StandardTestDispatcher and resets it
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    // Test dispatcher provider for deterministic coroutine execution
+    private val testDispatcherProvider = TestDispatcherProvider()
+
+    @Test
+    fun `loadData updates state correctly`() = runTest {
+        val viewModel = MyViewModel(dispatchers = testDispatcherProvider)
+        viewModel.loadData()
+        
+        // Assert state deterministically with virtual time
+        assertEquals(expectedState, viewModel.state.value)
+    }
 }
 ```
 
-### 6. Storage & Persistence
-Flexible storage system using providers.
+#### Included Test Fixtures:
+* `MainDispatcherRule`: JUnit Rule for automatically setting and restoring `Dispatchers.Main`.
+* `TestDispatcherProvider`: `DispatcherProvider` implementation backed by test dispatchers.
+* `FakeAppEventBus`: Record and inspect events published during unit tests.
+* `FakeAppInfoProvider`: Provide deterministic application metadata without Android `PackageManager`.
+* `FakeDeviceInfoProvider`: Provide deterministic device metadata without Android `Build` properties.
+
+---
+
+### 3. ⏱️ Flow Operators (`throttleFirst`)
+Prevent rapid double-clicks, burst events, and duplicate network requests.
 
 ```kotlin
-// SharedPreferences implementation with serialization
-val storage = SharedPreferencesStorageProvider(sharedPrefs, gsonSerializer)
-storage.save("user_key", user)
-val user = storage.read<User>("user_key")
+import es.joshluq.foundationkit.coroutines.throttleFirst
+
+// Suppress subsequent emissions within a 1-second window
+buttonClicksFlow
+    .throttleFirst(windowDurationMillis = 1_000L)
+    .onEach { event -> viewModel.sendEvent(event) }
+    .launchIn(lifecycleScope)
 ```
 
-### 7. Managers & Providers
-FoundationKit uses a **Provider-Manager** pattern to decouple implementation from definition.
+---
 
-- **Providers**: Interfaces that define a specific service (e.g., `AnalyticsProvider`, `StorageProvider`).
-- **Managers**: Abstract classes that coordinate one or more providers and manage their lifecycle/configuration.
+### 4. 🛡️ Typed Infrastructure Errors (`AppError`)
+Structured, non-business platform errors ready to plug into Clean Architecture and UI states.
 
 ```kotlin
-// Example of a Manager implementation
-class MyManager : Manager<MyConfig>() {
-    override fun onInitialize() {
-        // Setup with config
+sealed interface AppError {
+    Network, NoInternet, Timeout, Storage, Serialization,
+    Cryptographic, NotFound, PermissionDenied, Authentication,
+    Validation, Unexpected
+}
+```
+
+#### Integration with `TextProvider` and `ListState`:
+```kotlin
+val error: AppError = AppError.NoInternet()
+
+// Map directly to localized/dynamic TextProvider
+val textProvider: TextProvider = error.toTextProvider()
+
+// Map directly to UI ListState.Error
+val listState: ListState.Error = error.toListStateError()
+```
+
+---
+
+### 5. 📱 Device & Application Metadata (`AppInfoProvider` & `DeviceInfoProvider`)
+Decoupled providers to query application and device attributes without leaking Android framework details into business layers.
+
+```kotlin
+// Obtain providers from any Android Context
+val appInfoProvider: AppInfoProvider = context.appInfoProvider()
+val deviceInfoProvider: DeviceInfoProvider = context.deviceInfoProvider()
+
+// Query immutable metadata
+val appInfo: AppInfo = appInfoProvider.getAppInfo()
+println("App: ${appInfo.packageName} v${appInfo.versionName} (build ${appInfo.versionCode}), debuggable=${appInfo.isDebuggable}")
+
+val deviceInfo: DeviceInfo = deviceInfoProvider.getDeviceInfo()
+println("Device: ${deviceInfo.manufacturer} ${deviceInfo.model}, OS: Android ${deviceInfo.osVersion} (SDK ${deviceInfo.sdkInt}), tablet=${deviceInfo.isTablet}")
+```
+
+---
+
+### 6. 📡 Lightweight, Type-Safe Event Bus (`AppEventBus`)
+Coroutines-powered reactive event bus for cross-cutting communication across modules without third-party reflection libraries.
+
+```kotlin
+import es.joshluq.foundationkit.event.AppEvent
+import es.joshluq.foundationkit.event.DefaultAppEventBus
+import es.joshluq.foundationkit.event.subscribe
+
+// 1. Define typed domain events
+data class SessionExpiredEvent(val reason: String) : AppEvent
+
+// 2. Instantiate or inject bus (powered by MutableSharedFlow)
+val eventBus: AppEventBus = DefaultAppEventBus()
+
+// 3. Publish events (suspending or non-suspending)
+eventBus.publish(SessionExpiredEvent("Token invalidated"))
+eventBus.tryPublish(SessionExpiredEvent("Quick notification"))
+
+// 4. Subscribe strictly to specific event types
+lifecycleScope.launch {
+    eventBus.subscribe<SessionExpiredEvent>().collect { event ->
+        navigateToLogin(event.reason)
     }
 }
 ```
 
 ---
 
-## 📱 Showcase
-The project includes a `:showcase` module where you can see all these components working together in a real Android app with Jetpack Compose.
+### 7. 🏗️ DSL Initialization Pattern
+The official standard for creating configurable managers and SDK entry points.
+
+#### Flavor A: Context-Aware Manager (Android SDK)
+```kotlin
+val manager = MyManager.build(context) {
+    apiKey = "XYZ-123"
+    debugMode = true
+}
+```
+
+#### Flavor B: Pure Logic Manager (JVM / Pure Kotlin)
+```kotlin
+val manager = PureManager.build {
+    precision = 4
+}
+```
+
+---
+
+### 8. 🏛️ Clean Architecture & MVI Foundation
+
+* **Use Cases**: Standardized `UseCase<I, O>` (one-shot `suspend`) and `FlowUseCase<I, O>` (reactive stream) with `UseCaseInput` and `UseCaseOutput`.
+* **ScreenViewModel**: Unidirectional Data Flow (UDF) managing `UiState` (immutable for Compose Strong Skipping), `UiEvent`, and one-off `UiEffect`.
+
+```kotlin
+class ProfileViewModel(
+    private val fetchProfile: FetchProfileUseCase
+) : ScreenViewModel<ProfileState, ProfileEvent, ProfileEffect>() {
+
+    override fun createInitialState(): ProfileState = ProfileState()
+
+    override fun handleEvent(event: ProfileEvent) {
+        when (event) {
+            is ProfileEvent.Refresh -> reload()
+        }
+    }
+}
+```
+
+---
+
+### 9. 💬 Decoupled Text (`TextProvider`)
+Represent strings in ViewModels without leaking `android.content.Context`.
+
+```kotlin
+// In ViewModel / Domain:
+val title = TextProvider.Resource(R.string.welcome_message, "User")
+val dynamic = TextProvider.Dynamic("Server response text")
+
+// In UI:
+val text = title.asString(context)
+
+// In Jetpack Compose:
+Text(text = title.asString())
+```
+
+---
+
+### 10. 📊 Exhaustive Data Collections (`ListState`)
+Represent the full lifecycle of data collections in UI.
+
+```kotlin
+val state: ListState<Item> = itemsResult.toListState()
+
+when (state) {
+    is ListState.Idle -> Unit
+    is ListState.Loading -> CircularProgressIndicator()
+    is ListState.Success -> ItemList(state.data)
+    is ListState.Empty -> EmptyPlaceholder()
+    is ListState.Error -> ErrorMessage(state.message.asString())
+}
+```
+
+---
+
+### 11. 💾 Storage Providers
+Abstracted key-value and object storage with serialization support:
+* `CacheStorageProvider`: In-memory thread-safe cache (`ConcurrentHashMap`).
+* `SharedPreferencesStorageProvider`: Android `SharedPreferences` with custom `SerializerProvider`.
+
+---
+
+## 📱 Showcase App
+
+Check out the `:showcase` module in this repository for working examples and integration patterns with Jetpack Compose.
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License.
+Licensed under the [MIT License](LICENSE).

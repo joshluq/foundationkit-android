@@ -9,12 +9,19 @@ import java.util.concurrent.ConcurrentHashMap
 class CacheStorageProvider : StorageProvider {
     private val cache = ConcurrentHashMap<String, Any>()
 
-    override suspend fun <T : Any> save(key: String, value: T, type: Class<T>) {
+    override suspend fun <T : Any> save(
+        key: String,
+        value: T,
+        type: Class<T>,
+    ) {
         cache[key] = value
     }
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> read(key: String, type: Class<T>): T? {
+    override suspend fun <T : Any> read(
+        key: String,
+        type: Class<T>,
+    ): T? {
         val value = cache[key]
         return if (type.isInstance(value)) {
             value as T
